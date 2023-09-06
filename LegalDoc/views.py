@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 
 
-
 def handle_uploaded_file(f):
     with open("D:/uploads/+f.name", "wb+") as destination:
         for chunk in f.chunks():
@@ -79,7 +78,7 @@ def addCustomer(request):
             m.created_by = request.user
             m.created_on = current_datetime
             m.save()
-            #form.save()
+            # form.save()
             messages.success(request, "You have successfully added customer.")
             return HttpResponseRedirect('/LegalDoc/addCustomer')
     return render(request, 'addCustomer.html', {'form': form})
@@ -146,7 +145,7 @@ def addSecurity(request):
             m.created_by = request.user
             m.created_at = current_datetime
             m.save()
-            #form.save()
+            # form.save()
             handle_uploaded_file(request.FILES["file_sec"])
             messages.success(request, "You have successfully security.")
             return HttpResponseRedirect('/LegalDoc/addSecurity')
@@ -173,7 +172,6 @@ def updateSecurity(request, id):
     return render(request, 'update_security.html', {'form': form})
 
 
-
 @login_required(login_url='/LegalDoc/')
 def updateCustomer(request, id):
     sec = Customer.objects.get(id=id)
@@ -186,7 +184,6 @@ def updateCustomer(request, id):
     else:
         form = CustomerForm(instance=sec)
     return render(request, 'update_customer.html', {'form': form})
-
 
 
 @login_required(login_url='/LegalDoc/')
@@ -248,6 +245,7 @@ def sendForMortgage(request, id):
         form = MorgagedForm(instance=sec)
     return render(request, 'sendForMortgage.html', {'form': form})
 
+
 @login_required(login_url='/LegalDoc/')
 def sentForFurtherCharges(request, id):
     sec = Security.objects.get(id=id)
@@ -260,3 +258,40 @@ def sentForFurtherCharges(request, id):
     else:
         form = sentForFurtherCharge(instance=sec)
     return render(request, 'sentForFurtherCharge.html', {'form': form})
+
+
+@login_required(login_url='/LegalDoc/')
+def addContract(request):
+    form = ContractForm(request.POST, request.FILES)
+    current_datetim = datetime.datetime.now()
+    if request.method == 'POST':
+        if form.is_valid():
+            m = form.save(commit=False)
+            m.created_by = request.user
+            m.created_at = current_datetim
+            m.save()
+
+            handle_uploaded_file(request.FILES["contract_file"])
+            messages.success(request, "You have successfully add contract.")
+            return HttpResponseRedirect('/LegalDoc/addContract')
+    return render(request, 'addContract.html', {'form': form})
+
+
+@login_required(login_url='/LegalDoc/')
+def getContracts(request):
+    contract = Contracts.objects.all().order_by('-id')
+    return render(request, 'contracts.html', {'contract': contract})
+
+
+@login_required(login_url='/LegalDoc/')
+def updateContract(request, id):
+    sec = Contracts.objects.get(id=id)
+
+    if request.method == 'POST':
+        form = ContractForm(request.POST, instance=sec)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/LegalDoc/getContracts')
+    else:
+        form = ContractForm(instance=sec)
+    return render(request, 'update_contracts.html', {'form': form})

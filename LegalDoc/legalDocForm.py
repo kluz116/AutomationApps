@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import HiddenInput
 
-from .models import Branch, Customer, SecurityType, SecurityStatus, LandTitleType, Security
+from .models import Branch, Customer, SecurityType, SecurityStatus, LandTitleType, Security, Contracts
 
 
 class BranchForm(forms.ModelForm):
@@ -149,6 +149,24 @@ class sentForFurtherCharge(forms.ModelForm):
             ),
             'sent_for_further_charge_at': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control', 'readonly': 'True'}
+            ),
+
+        }
+        
+
+class ContractForm(forms.ModelForm):
+    class Meta:
+        model = Contracts
+        fields = ['Party_Name','branch','Contract_value','DateSigned','Duration','contract_file','status','Expiry_Date','Description','Compulsory_Terms','InsuranceTerms']
+        widgets = {
+            'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                   'data-live-search': 'true', 'data-style': 'btn-white'}),
+
+            'DateSigned': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
+            ),
+            'Expiry_Date': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
             ),
 
         }

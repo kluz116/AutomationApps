@@ -90,3 +90,21 @@ class Security(models.Model):
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
 
     #created_by = models.ForeignKey('auth.User', related_name='created_by_user',on_delete=models.CASCADE)
+
+
+class Contracts(models.Model):
+    Party_Name = models.CharField(max_length=20)
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    Contract_value =models.FloatField(max_length=20)
+    DateSigned = models.DateField(default=datetime.now)
+    Duration = models.CharField(max_length=20)
+    status = models.CharField(max_length=50, choices=[("on", "On"),("Expired", "Expired"),("Expired", "Expired"),("Terminated", "Terminated")],default='on')
+    Expiry_Date=models.DateField(default=datetime.now)
+    Description = models.CharField(max_length=200)
+    Compulsory_Terms = models.CharField(max_length=200)
+    InsuranceTerms = models.CharField(max_length=200)
+    contract_file = models.FileField(upload_to='uploads/%Y/%m/%d/', blank=True)
+    created_by = models.ForeignKey(User,on_delete=models.CASCADE)
+    created_on = models.DateTimeField(default=datetime.now)
+    
+    
