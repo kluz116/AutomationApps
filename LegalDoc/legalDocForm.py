@@ -16,15 +16,9 @@ class CustomerForm(forms.ModelForm):
         fields = "__all__"
         exclude = ('created_by','created_on')
         widgets = {
-            'birthdate': forms.DateInput(
-                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
-            ),
-            'date_joined': forms.DateInput(
-                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
-            ),
+
             'gender': forms.Select(attrs={'class': ''}),
-            'status': forms.Select(attrs={'class': 'form-control', 'data-size': '5',
-                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
+
             'bank_branch': forms.Select(
                 attrs={'class': 'selectpicker form-control', 'data-size': '5', 'tickIcon': 'glyphicon-ok',
                        'data-live-search': 'true', 'data-style': 'btn-white', 'data-header': 'Select a Branch'})
@@ -61,8 +55,7 @@ class SecurityForm(forms.ModelForm):
     class Meta:
         model = Security
         fields = ['branch','client', 'client_type', 'file_sec', 'Security_owner', 'security_type', 'security_status',
-                  'LandTitleType', 'Lease_Hold_Tenure', 'LeaseHoldExpiryDate', 'DateRecieved', 'ForcedSaleValue',
-                  'Security_Description', 'Insurance_Details']
+                  'LandTitleType', 'Lease_Hold_Tenure', 'LeaseHoldExpiryDate','Security_Description']
         widgets = {
             'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                'data-live-search': 'true', 'data-style': 'btn-white'}),
