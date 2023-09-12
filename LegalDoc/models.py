@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 from datetime import *
+from smart_selects.db_fields import ChainedForeignKey
 from django_currentuser.db.models import CurrentUserField
-
 
 class Branch(models.Model):
     name = models.CharField(max_length=20)
@@ -66,15 +67,16 @@ class Customer(models.Model):
 
 class Security(models.Model):
     client = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    client_type = models.CharField(max_length=50,choices=[("borrower", "Borrower"), ("Powers_of_the_Attorney", "Powers of the Attorney")])
+    client_type = models.CharField(max_length=50,choices=[("borrower", "Borrower"), ("Third_Party", "Third Party")])
     status = models.CharField(max_length=50, choices=[("InCustody", "In Custody"),("Withdrawn", "Withdrawn"),("Expired", "Expired"),("Recieved", "Recieved")],default='InCustody')
     file_sec = models.FileField(upload_to='uploads/%Y/%m/%d/', blank=True)
     Security_owner = models.CharField(max_length=20)
     security_type = models.ForeignKey(SecurityType, on_delete=models.CASCADE)
     security_status = models.ForeignKey(SecurityStatus, on_delete=models.CASCADE)
     LandTitleType = models.ForeignKey(LandTitleType, on_delete=models.CASCADE)
-    Lease_Hold_Tenure= models.CharField(max_length=50,blank=True)
-    LeaseHoldExpiryDate = models.DateField()
+    LeaseHoldStartDate = models.DateField(blank=True,null=True)
+    Lease_Hold_Tenure = models.IntegerField(blank=True, null=True)
+    #LeaseHoldExpiryDate = models.DateField()
     #DateRecieved = models.DateField()
     #ForcedSaleValue = models.CharField(max_length=100)
     Security_Description = models.CharField(max_length=100)
@@ -89,7 +91,15 @@ class Security(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
 
-    #created_by = models.ForeignKey('auth.User', related_name='created_by_user',on_delete=models.CASCADE)
+    @property
+    def lease_end_date(self):
+        if self.LeaseHoldStartDate is None:
+            return None
+        else:
+            return self.LeaseHoldStartDate + relativedelta(years=self.Lease_Hold_Tenure)
+
+    #date_time = datetime.now(east_africa) + + timedelta(hours=self.Incident_category.Timeline_two)
+    #self.escalation_level_two = format(date_time, '%Y-%m-%d %H:%M')
 
 
 class Contracts(models.Model):

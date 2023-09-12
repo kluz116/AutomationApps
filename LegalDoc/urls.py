@@ -29,6 +29,9 @@ urlpatterns = [
     path('download/<int:file_id>/', views.download_file, name='download_file'),
     path('sendForMortgage/<int:id>/', views.sendForMortgage, name='sendForMortgage'),
     path('sentForFurtherCharges/<int:id>/', views.sentForFurtherCharges, name='sentForFurtherCharges'),
+    path('security_status', views.security_status, name='security_status'),
+    path('landtitle', views.landtitle, name='landtitle'),
+
 
 
 

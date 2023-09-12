@@ -14,7 +14,7 @@ class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = "__all__"
-        exclude = ('created_by','created_on')
+        exclude = ('created_by', 'created_on')
         widgets = {
 
             'gender': forms.Select(attrs={'class': ''}),
@@ -54,38 +54,53 @@ class LandTitleForm(forms.ModelForm):
 class SecurityForm(forms.ModelForm):
     class Meta:
         model = Security
-        fields = ['branch','client', 'client_type', 'file_sec', 'Security_owner', 'security_type', 'security_status',
-                  'LandTitleType', 'Lease_Hold_Tenure', 'LeaseHoldExpiryDate','Security_Description']
+        fields = ['branch', 'client', 'client_type', 'file_sec', 'Security_owner', 'security_type', 'security_status',
+                  'LandTitleType', 'LeaseHoldStartDate','Lease_Hold_Tenure', 'Security_Description']
         widgets = {
             'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
-                                               'data-live-search': 'true', 'data-style': 'btn-white'}),
+                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
 
             'client': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                           'data-live-search': 'true', 'data-style': 'btn-white'}),
             'security_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                  'data-live-search': 'true', 'data-style': 'btn-white'}),
-            'security_status': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+            'security_status': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
                                                    'data-live-search': 'true', 'data-style': 'btn-white'}),
-            'LandTitleType': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+            'LandTitleType': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
                                                  'data-live-search': 'true', 'data-style': 'btn-white'}),
             'client_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                'data-live-search': 'true', 'data-style': 'btn-white'}),
 
-            'LeaseHoldExpiryDate': forms.DateInput(
+            'LeaseHoldStartDate': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
             ),
-            'DateRecieved': forms.DateInput(
-                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
-            ),
-           # 'created_by': forms.Select(
-                #attrs={'type': 'text', 'class': 'form-control', 'readonly': 'true'}
+            'Security_Description':forms.TextInput(attrs={'class':'form-control','placeholder':'Security Description'}),
+            'Security_owner': forms.TextInput(attrs={'class':'form-control','placeholder':'Security Owner'}),
+            'Lease_Hold_Tenure':  forms.TextInput(attrs={'class':'form-control','placeholder':'Lease Hold Tenure'}),
+            #'DateRecieved': forms.DateInput(
+               # attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
             #),
+            # 'created_by': forms.Select(
+            # attrs={'type': 'text', 'class': 'form-control', 'readonly': 'true'}
+            # ),
             'file_sec': forms.FileInput(attrs={'class': 'form-control', 'readonly': True}),
 
-            #'created_at': forms.DateInput(attrs={'class': 'form-control', 'id': 'datepicker-autoClose'}),
+            # 'created_at': forms.DateInput(attrs={'class': 'form-control', 'id': 'datepicker-autoClose'}),
         }
 
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['security_status'].queryset = SecurityStatus.objects.none()
+        self.fields['LandTitleType'].queryset = LandTitleType.objects.none()
+        if 'security_type' in self.data:
+            try:
+                security_type_id = int(self.data.get('security_type'))
+                self.fields['security_status'].queryset = SecurityStatus.objects.filter(security_type_id=security_type_id).order_by('name')
+                self.fields['LandTitleType'].queryset = LandTitleType.objects.filter(security_type_id=security_type_id)
+            except (ValueError, TypeError):
+                    pass  # invalid input from the client; ignore and fallback to empty City queryset
+        #elif self.instance.pk:
+            #self.fields['security_status'].queryset = self.instance.security_type.name.order_by('name')
 
 
 class WithdrawForm(forms.ModelForm):
@@ -116,7 +131,7 @@ class UploadForm(forms.ModelForm):
 class MorgagedForm(forms.ModelForm):
     class Meta:
         model = Security
-        fields = ['security_status','sent_for_mortgaging_by','sent_for_mortgaging_at']
+        fields = ['security_status', 'sent_for_mortgaging_by', 'sent_for_mortgaging_at']
         widgets = {
             'security_status': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                    'data-live-search': 'true', 'data-style': 'btn-white'}),
@@ -133,7 +148,7 @@ class MorgagedForm(forms.ModelForm):
 class sentForFurtherCharge(forms.ModelForm):
     class Meta:
         model = Security
-        fields = ['security_status','sent_for_further_charge_by','sent_for_further_charge_at']
+        fields = ['security_status', 'sent_for_further_charge_by', 'sent_for_further_charge_at']
         widgets = {
             'security_status': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                    'data-live-search': 'true', 'data-style': 'btn-white'}),
@@ -145,15 +160,16 @@ class sentForFurtherCharge(forms.ModelForm):
             ),
 
         }
-        
+
 
 class ContractForm(forms.ModelForm):
     class Meta:
         model = Contracts
-        fields = ['Party_Name','branch','Contract_value','DateSigned','Duration','contract_file','status','Expiry_Date','Description','Compulsory_Terms','InsuranceTerms']
+        fields = ['Party_Name', 'branch', 'Contract_value', 'DateSigned', 'Duration', 'contract_file', 'status',
+                  'Expiry_Date', 'Description', 'Compulsory_Terms', 'InsuranceTerms']
         widgets = {
             'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
-                                                   'data-live-search': 'true', 'data-style': 'btn-white'}),
+                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
 
             'DateSigned': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}

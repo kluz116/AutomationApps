@@ -1,8 +1,8 @@
 import datetime
-
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .legalDocForm import *
 from django.contrib import messages
@@ -14,7 +14,6 @@ def handle_uploaded_file(f):
     with open("D:/uploads/+f.name", "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
-
 
 def index(request):
     return render(request, 'index.html', {})
@@ -86,13 +85,13 @@ def addCustomer(request):
 
 @login_required(login_url='/LegalDoc/')
 def getSecurityType(request):
-    securitytype = SecurityType.objects.all().order_by('-created_on')
+    securitytype = SecurityType.objects.all().order_by('-id')
     return render(request, 'securitytype.html', {'securitytype': securitytype})
 
 
 @login_required(login_url='/LegalDoc/')
 def addSecurityType(request):
-    form = SecurityTypeForm(request.POST or None)
+    form = SecurityTypeForm(request.POST or None, )
     if request.method == 'POST':
         if form.is_valid():
             form.save()
@@ -135,6 +134,18 @@ def getLandTitleType(request):
     return render(request, 'LandTitle.html', {'landtitletype': landtitletype})
 
 
+def security_status(request):
+    data = json.loads(request.body)
+    securitystatus = SecurityStatus.objects.filter(security_type__id=data['user_id'])
+    return JsonResponse(list(securitystatus.values("id", "name")), safe=False)
+
+
+def landtitle(request):
+    data = json.loads(request.body)
+    landtitle = LandTitleType.objects.filter(security_type__id=data['user_id'])
+    return JsonResponse(list(landtitle.values("id", "name")), safe=False)
+
+
 @login_required(login_url='/LegalDoc/')
 def addSecurity(request):
     form = SecurityForm(request.POST, request.FILES)
@@ -154,7 +165,7 @@ def addSecurity(request):
 
 @login_required(login_url='/LegalDoc/')
 def getSecurity(request):
-    security = Security.objects.all().order_by('-DateRecieved')
+    security = Security.objects.all().order_by('-id')
     return render(request, 'security.html', {'security': security})
 
 
