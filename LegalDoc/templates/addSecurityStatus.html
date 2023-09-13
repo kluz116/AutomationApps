@@ -21,10 +21,16 @@
                     {% include 'messages.html' %}
 					<form class="form-horizontal" method="post" action="">
 								<div class="col-md-12">
-                                 {% csrf_token %}
-                                    {{form|crispy}}
+                                    {% csrf_token %}
+                                    {% for field in form %}
 
-                                 <br><br>
+                                    <label class="form-label">{{field.label}}</label>
+
+                                    {{field}}
+                                    <br>
+                                    {% endfor %}
+
+                                 <br>
 								<button class="btn btn-sm btn-outline-success">Add Security Status</button><br><br>
                                 </div>
 					</form>

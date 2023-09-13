@@ -14,7 +14,6 @@
                     {% include 'messages.html' %}
                        <img src="{% static 'assets/img/logo/ftb.png' %}" alt=""  class="mx-auto d-block" height="100"/>
 
-
                        <form method="POST">
                             {% csrf_token %}
                             {{ login_form|crispy }}

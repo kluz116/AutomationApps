@@ -8,17 +8,26 @@ class BranchForm(forms.ModelForm):
     class Meta:
         model = Branch
         fields = "__all__"
+        widgets = {
+            'branch_code':  forms.TextInput(attrs={'class':'form-control','placeholder':'Branch Code'}),
+            'name': forms.TextInput(attrs={'class': 'form-control','placeholder':'Branch Name'}),
+        }
 
 
 class CustomerForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = "__all__"
-        exclude = ('created_by', 'created_on')
+        exclude = ('created_by', 'created_on','status')
         widgets = {
 
-            'gender': forms.Select(attrs={'class': ''}),
-
+            'gender': forms.Select(attrs={'class': 'form-control','placeholder': 'Gender'}),
+            'firstname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'middlename': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Middle Name'}),
+            'lastname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'national_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'National ID (NIN)'}),
+            'bank_account': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AccountID'}),
+            'bank_tin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'TIN'}),
             'bank_branch': forms.Select(
                 attrs={'class': 'selectpicker form-control', 'data-size': '5', 'tickIcon': 'glyphicon-ok',
                        'data-live-search': 'true', 'data-style': 'btn-white', 'data-header': 'Select a Branch'})
@@ -30,12 +39,18 @@ class SecurityTypeForm(forms.ModelForm):
         model = SecurityType
         fields = "__all__"
 
+        widgets = {
+
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}),
+        }
+
 
 class SecurityStatusForm(forms.ModelForm):
     class Meta:
         model = SecurityStatus
         fields = "__all__"
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Name'}),
             'security_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                  'data-live-search': 'true', 'data-style': 'btn-white'})
         }
@@ -62,14 +77,14 @@ class SecurityForm(forms.ModelForm):
 
             'client': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                           'data-live-search': 'true', 'data-style': 'btn-white'}),
-            'security_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+            'security_type': forms.Select(attrs={'class': 'form-control  selectpicker', 'data-size': '5',
                                                  'data-live-search': 'true', 'data-style': 'btn-white'}),
             'security_status': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
                                                    'data-live-search': 'true', 'data-style': 'btn-white'}),
             'LandTitleType': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
                                                  'data-live-search': 'true', 'data-style': 'btn-white'}),
             'client_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
-                                               'data-live-search': 'true', 'data-style': 'btn-white'}),
+                                               'data-live-search': 'true', 'data-style': 'btn-white','label':'Please select a string'}),
 
             'LeaseHoldStartDate': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
@@ -77,21 +92,14 @@ class SecurityForm(forms.ModelForm):
             'Security_Description':forms.TextInput(attrs={'class':'form-control','placeholder':'Security Description'}),
             'Security_owner': forms.TextInput(attrs={'class':'form-control','placeholder':'Security Owner'}),
             'Lease_Hold_Tenure':  forms.TextInput(attrs={'class':'form-control','placeholder':'Lease Hold Tenure'}),
-            #'DateRecieved': forms.DateInput(
-               # attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
-            #),
-            # 'created_by': forms.Select(
-            # attrs={'type': 'text', 'class': 'form-control', 'readonly': 'true'}
-            # ),
-            'file_sec': forms.FileInput(attrs={'class': 'form-control', 'readonly': True}),
-
-            # 'created_at': forms.DateInput(attrs={'class': 'form-control', 'id': 'datepicker-autoClose'}),
+            'file_sec': forms.FileInput(attrs={'class': 'form-control','placeholder':'Security File'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['security_status'].queryset = SecurityStatus.objects.none()
         self.fields['LandTitleType'].queryset = LandTitleType.objects.none()
+        self.fields['client'].queryset = Customer.objects.filter(status='No')
         if 'security_type' in self.data:
             try:
                 security_type_id = int(self.data.get('security_type'))
@@ -177,5 +185,13 @@ class ContractForm(forms.ModelForm):
             'Expiry_Date': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
             ),
+            'Party_Name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Party Name'}),
+            'Compulsory_Terms': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Compulsory Terms'}),
+            'InsuranceTerms': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Insurance Terms'}),
+            'Description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Description'}),
+            'Duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Duration'}),
+            'Contract_value': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contract Value'}),
+            'contract_file': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contract File'}),
+            'status': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Status'}),
 
         }

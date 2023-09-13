@@ -15,7 +15,7 @@ class Branch(models.Model):
 
 
 class SecurityType(models.Model):
-    name = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
     def __str__(self):
         return self.name
 
@@ -29,29 +29,21 @@ class SecurityStatus(models.Model):
 
 
 class LandTitleType(models.Model):
-    name = models.CharField(max_length=25)
+    name = models.CharField(max_length=100)
     security_type = models.ForeignKey(SecurityType, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class Customer(models.Model):
-    gender_list = [("M", "Male"), ("F", "Female"), ]
+    gender_list = [("Male", "Male"), ("Female", "Female"), ]
+    customer_status = [("No", "No"), ("Yes", "Yes"), ]
     firstname = models.CharField(max_length=60)
     middlename = models.CharField(max_length=60, blank=True)
     lastname = models.CharField(max_length=60)
-    gender = models.CharField(max_length=1, choices=gender_list)
-    #birthdate = models.DateField(db_comment="Birth Date")
-    #address = models.CharField(max_length=60)
-    #email = models.CharField(max_length=60, blank=True)
-    #tel = models.CharField(max_length=60)
+    gender = models.CharField(max_length=10, choices=gender_list)
+    status = models.CharField(max_length=5, choices=customer_status,default='No')
     national_id = models.CharField(max_length=12)
-    #occupation = models.CharField(max_length=25, blank=True)
-    #date_joined = models.DateField(db_comment="Birth Date", )
-    #status = models.CharField(max_length=10, choices=[("live", "Live"), ("deceased", "Deceased")])
-    #kin_name = models.CharField(max_length=60)
-    #kin_relationship = models.CharField(max_length=60)
-    #kin_tel = models.CharField(max_length=20)
     bank_account = models.CharField(max_length=20, blank=True)
     #bank_branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     bank_tin = models.CharField(max_length=20)
@@ -60,10 +52,6 @@ class Customer(models.Model):
 
     def __str__(self):
         return f'{self.firstname} {self.lastname}'
-
-    class Meta:
-        ordering = ('-id',)
-
 
 class Security(models.Model):
     client = models.ForeignKey(Customer, on_delete=models.CASCADE)
@@ -98,8 +86,10 @@ class Security(models.Model):
         else:
             return self.LeaseHoldStartDate + relativedelta(years=self.Lease_Hold_Tenure)
 
-    #date_time = datetime.now(east_africa) + + timedelta(hours=self.Incident_category.Timeline_two)
-    #self.escalation_level_two = format(date_time, '%Y-%m-%d %H:%M')
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            Customer.objects.filter(pk=self.client_id).update(status='Yes')
+        super().save(*args, **kwargs)
 
 
 class Contracts(models.Model):

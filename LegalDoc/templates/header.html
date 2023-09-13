@@ -21,9 +21,8 @@
 						<span class="d-none d-md-inline">Welcome, {{user.username}}</span> <b class="caret"></b>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
-						<a href="javascript:;" class="dropdown-item">Setting</a>
-						<div class="dropdown-divider"></div>
 						<a href="{% url 'logout_request' %}" class="dropdown-item">Logout</a>
+
 					</div>
                      {% endif %}
 				</li>
