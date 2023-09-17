@@ -157,7 +157,7 @@ def addSecurity(request):
             m.created_at = current_datetime
             m.save()
             # form.save()
-            handle_uploaded_file(request.FILES["file_sec"])
+            handle_uploaded_file(request.FILES["security_file"])
             messages.success(request, "You have successfully security.")
             return HttpResponseRedirect('/LegalDoc/addSecurity')
     return render(request, 'addSecurity.html', {'form': form})
@@ -174,12 +174,12 @@ def updateSecurity(request, id):
     sec = Security.objects.get(id=id)
 
     if request.method == 'POST':
-        form = SecurityForm(request.POST, instance=sec)
+        form = SecurityEditForm(request.POST, instance=sec)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect('/LegalDoc/getSecurity')
     else:
-        form = SecurityForm(instance=sec)
+        form = SecurityEditForm(instance=sec)
     return render(request, 'update_security.html', {'form': form})
 
 
@@ -225,7 +225,7 @@ def uploadSecurity(request, id):
         form = UploadForm(request.POST, request.FILES, instance=sec)
         if form.is_valid():
             form.save()
-            handle_uploaded_file(request.FILES["file_sec"])
+            handle_uploaded_file(request.FILES["security_file"])
             return HttpResponseRedirect('/LegalDoc/getSecurity')
     else:
         form = UploadForm(instance=sec)
@@ -235,9 +235,9 @@ def uploadSecurity(request, id):
 @login_required(login_url='/LegalDoc/')
 def download_file(request, file_id):
     uploaded_file = Security.objects.get(pk=file_id)
-    if uploaded_file.file_sec:
-        response = HttpResponse(uploaded_file.file_sec, content_type='application/force-download')
-        response['Content-Disposition'] = f'attachment; filename="{uploaded_file.file_sec.name}"'
+    if uploaded_file.security_file:
+        response = HttpResponse(uploaded_file.security_file, content_type='application/force-download')
+        response['Content-Disposition'] = f'attachment; filename="{uploaded_file.security_file.name}"'
         return response
     else:
         return HttpResponseRedirect('/LegalDoc/getSecurity')

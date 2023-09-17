@@ -1,8 +1,22 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.forms import HiddenInput
 
-from .models import Branch, Customer, SecurityType, SecurityStatus, LandTitleType, Security, Contracts
+from .models import Branch, Customer, SecurityType, SecurityStatus, LandTitleType, Security, Contracts,CustomUser
 
+
+class CustomUserCreationForm(UserCreationForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ("email",)
+
+
+class CustomUserChangeForm(UserChangeForm):
+
+    class Meta:
+        model = CustomUser
+        fields = ("email",)
 
 class BranchForm(forms.ModelForm):
     class Meta:
@@ -69,7 +83,7 @@ class LandTitleForm(forms.ModelForm):
 class SecurityForm(forms.ModelForm):
     class Meta:
         model = Security
-        fields = ['branch', 'client', 'client_type', 'file_sec', 'Security_owner', 'security_type', 'security_status',
+        fields = ['branch', 'client', 'client_type', 'security_file', 'Security_owner', 'security_type', 'security_status',
                   'LandTitleType', 'LeaseHoldStartDate','Lease_Hold_Tenure', 'Security_Description']
         widgets = {
             'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
@@ -92,7 +106,7 @@ class SecurityForm(forms.ModelForm):
             'Security_Description':forms.TextInput(attrs={'class':'form-control','placeholder':'Security Description'}),
             'Security_owner': forms.TextInput(attrs={'class':'form-control','placeholder':'Security Owner'}),
             'Lease_Hold_Tenure':  forms.TextInput(attrs={'class':'form-control','placeholder':'Lease Hold Tenure'}),
-            'file_sec': forms.FileInput(attrs={'class': 'form-control','placeholder':'Security File'}),
+            'security_file': forms.FileInput(attrs={'class': 'form-control','placeholder':'Security File'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -110,6 +124,34 @@ class SecurityForm(forms.ModelForm):
         #elif self.instance.pk:
             #self.fields['security_status'].queryset = self.instance.security_type.name.order_by('name')
 
+class SecurityEditForm(forms.ModelForm):
+    class Meta:
+        model = Security
+        fields = ['branch', 'client', 'client_type', 'security_file', 'Security_owner', 'security_type', 'security_status',
+                  'LandTitleType', 'LeaseHoldStartDate','Lease_Hold_Tenure', 'Security_Description']
+        widgets = {
+            'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
+
+            'client': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'security_type': forms.Select(attrs={'class': 'form-control  selectpicker', 'data-size': '5',
+                                                 'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'security_status': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
+                                                   'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'LandTitleType': forms.Select(attrs={'class': 'form-control ', 'data-size': '5',
+                                                 'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'client_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                               'data-live-search': 'true', 'data-style': 'btn-white','label':'Please select a string'}),
+
+            'LeaseHoldStartDate': forms.DateInput(
+                attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
+            ),
+            'Security_Description':forms.TextInput(attrs={'class':'form-control','placeholder':'Security Description'}),
+            'Security_owner': forms.TextInput(attrs={'class':'form-control','placeholder':'Security Owner'}),
+            'Lease_Hold_Tenure':  forms.TextInput(attrs={'class':'form-control','placeholder':'Lease Hold Tenure'}),
+            'security_file': forms.FileInput(attrs={'class': 'form-control','placeholder':'Security File'}),
+        }
 
 class WithdrawForm(forms.ModelForm):
     class Meta:
@@ -128,10 +170,10 @@ class WithdrawForm(forms.ModelForm):
 class UploadForm(forms.ModelForm):
     class Meta:
         model = Security
-        fields = ['file_sec']
+        fields = ['security_file']
         widgets = {
 
-            'file_sec': forms.FileInput(attrs={'class': 'form-control '}),
+            'security_file': forms.FileInput(attrs={'class': 'form-control '}),
 
         }
 
