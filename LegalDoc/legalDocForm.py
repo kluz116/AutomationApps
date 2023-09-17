@@ -9,7 +9,18 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ("email",)
+        fields = ['firstname','lastname','email','password','password1','password2','is_staff','branch']
+        widgets = {
+            'firstname':  forms.TextInput(attrs={'class':'form-control','placeholder':'First name'}),
+            'lastname': forms.TextInput(attrs={'class': 'form-control','placeholder':'Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'password': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+            'password1': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+            'password2': forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}),
+            'branch': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
+        }
+
 
 
 class CustomUserChangeForm(UserChangeForm):

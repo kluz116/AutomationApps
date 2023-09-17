@@ -15,6 +15,7 @@ def handle_uploaded_file(f):
         for chunk in f.chunks():
             destination.write(chunk)
 
+
 def index(request):
     return render(request, 'index.html', {})
 
@@ -54,6 +55,18 @@ def getCustomers(request):
 def getBranches(request):
     branch = Branch.objects.all().order_by('-id')
     return render(request, 'branches.html', {'branch': branch})
+
+
+@login_required(login_url='/LegalDoc/')
+def addUsers(request):
+    form = CustomUserCreationForm(request.POST or None)
+    if request.POST == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created successfully')
+            return HttpResponseRedirect('/LegalDoc/addBranch')
+
+    return render(request, 'addUsers.html', context={'form': form})
 
 
 @login_required(login_url='/LegalDoc/')
