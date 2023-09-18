@@ -26,6 +26,7 @@ def login_request(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
+
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
@@ -65,6 +66,7 @@ def addUsers(request):
             form.save()
             messages.success(request, 'Account created successfully')
             return HttpResponseRedirect('/LegalDoc/addBranch')
+
 
     return render(request, 'addUsers.html', context={'form': form})
 
@@ -319,3 +321,9 @@ def updateContract(request, id):
     else:
         form = ContractForm(instance=sec)
     return render(request, 'update_contracts.html', {'form': form})
+
+@login_required(login_url='/LegalDoc/')
+def getUsers(request):
+    user = CustomUser.objects.all().order_by('-id')
+    return render(request, 'users.html', {'user': user})
+

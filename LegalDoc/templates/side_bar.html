@@ -12,7 +12,7 @@
 							</div>
 							<div class="info">
 								<b class="caret pull-right"></b>
-								{{user.username}}
+								{{user.firstname}} {{user.lastname}}
 							</div>
 						</a>
 					</li>
@@ -90,11 +90,11 @@
 						<a href="javascript:;">
 							<b class="caret"></b>
 							<i class="fa fa-list"></i>
-							<span>User Configurations</span>
+							<span>User Setting</span>
 						</a>
 						<ul class="sub-menu">
 							<li class="active"><a href="{% url 'addUsers' %}">Add Users</a></li>
-							<li><a href="{% url 'addContract' %}">Add Contract</a></li>
+							<li><a href="{% url 'getUsers' %}">Users</a></li>
 
 						</ul>
 					</li>

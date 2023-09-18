@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "1578cfab-425a-4cc1-a612-e4e284a34ede",
+		"name": "FTB Carded Withdraw",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4140157"
+	},
+	"item": [
+		{
+			"name": "LoginUser",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"userID\": \"FN0984\",\r\n  \"password\": \"New@1234\",\r\n  \"branchID\": \"206\",\r\n  \"systemID\": \"700\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{abc_login}}/api/v1/Token/LoginUser",
+					"host": [
+						"{{abc_login}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"Token",
+						"LoginUser"
+					]
+				},
+				"description": "  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n\\[if gte mso 9\\]>  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \n  \nStartFragment  \n  \n\nAPI uses JWT token to restrict access to resources. API gets the  \ntoken by supplying valid operatorID and password that are given by Finance  \nTrust Bank.  \n  \nEndFragment"
+			},
+			"response": []
+		},
+		{
+			"name": "AddCashTransaction",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"TrxBranchID\": \"206\",\r\n    \"TrxBatchID\": null,\r\n    \"SerialID\": null,\r\n    \"OurBranchID\": \"206\",\r\n    \"AccountTypeID\": \"C\",\r\n    \"AccountID\": \"206209005703\",\r\n    \"ProductID\": \"209\",\r\n    \"ModuleID\": \"3010\",\r\n    \"TrxTypeID\": \"TD\",\r\n    \"TrxDate\": \"01 Sep 2023\",\r\n    \"Amount\": \"120000\",\r\n    \"LocalAmount\": \"120000\",\r\n    \"TrxCurrencyID\": \"UGX\",\r\n    \"TrxAmount\": \"120000\",\r\n    \"ExchangeRate\": \"1.0000\",\r\n    \"MeanRate\": \"1.0000\",\r\n    \"Profit\": \"0\",\r\n    \"InstrumentTypeID\": \"V\",\r\n    \"ChequeID\": \"0\",\r\n    \"ChequeDate\": null,\r\n    \"ReferenceNo\": \"\",\r\n    \"Remarks\": \"Test By Allan\",\r\n    \"TrxDescriptionID\": \"002\",\r\n    \"TrxDescription\": \"Allan Musembya\",\r\n    \"MainGLID\": \"1\",\r\n    \"ContraGLID\": \"100005\",\r\n    \"TrxFlagID\": \"\",\r\n    \"ImageID\": \"0\",\r\n    \"TrxPrinted\": \"0\",\r\n    \"CreatedBy\": \"MK1041\",\r\n    \"UpdateCount\": \"2\",\r\n    \"BREFTChargeID\": null,\r\n    \"BREFTTrxID\": null,\r\n    \"ReversalID\": \"0\",\r\n    \"SupervisedBy\": null,\r\n    \"SupervisedOn\": null,\r\n    \"ChargeOnExcessAmount\": \"0\",\r\n    \"IsChargeWaived\": \"false\",\r\n    \"TrxCodeID\": \"0\",\r\n    \"ValueDate\": \"17 May 2023\",\r\n    \"ForwardRemark\": \"\",\r\n    \"ErrorNo\": \"\",\r\n    \"MainRowID\": 0,\r\n    \"BranchType\": \"\",\r\n    \"ActionID\": null,\r\n    \"OtherDetails\": \"[{\\u0022name\\u0022:\\u0022TransactedBy\\u0022,\\u0022value\\u0022:\\u0022ROGER TUMWESIGE\\u0022},{\\u0022name\\u0022:\\u0022IdentificationNo\\u0022,\\u0022value\\u0022:\\u0022\\u0022},{\\u0022name\\u0022:\\u0022MobileNo\\u0022,\\u0022value\\u0022:\\u00220782104701\\u0022}]\",\r\n    \"ActionTypeID\": \"I\",\r\n    \"TillID\": \"3\",\r\n    \"AccountTagID\": null,\r\n    \"Denominations\": null,\r\n    \"CostCenterID\": \"99\",\r\n    \"ContraTillID\": 0,\r\n    \"DeletedBy\": null,\r\n    \"DeletedOn\": null,\r\n    \"DeletedReason\": null,\r\n    \"ApiActionTypeID\": 2,\r\n    \"ApiActionID\": 0,\r\n    \"ApiDynamicFields\": null,\r\n    \"ApiModuleID\": 3010,\r\n    \"ApiOperatorID\": \"MK1041\",\r\n    \"ApiOurBranchID\": \"401\",\r\n    \"ApiRequestID\": null,\r\n    \"ApiRoleID\": \"SBO\",\r\n    \"ApiUniqueID\": \"14339461283877748795\",\r\n    \"ApiOperatedOn\": \"01 Sep 2023 8:36 AM\",\r\n    \"ApiBankID\": null,\r\n    \"ApiSearchKey\": null,\r\n    \"RecentActivityModuleID\": null,\r\n    \"RecentActivityControls\": null,\r\n    \"RecentActivityControlValues\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{abc_base_url}}/api/v1/CashTransaction/AddCashTransaction",
+					"host": [
+						"{{abc_base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"CashTransaction",
+						"AddCashTransaction"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetAccountCustomer",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"DirectionType\": null,\r\n    \"AccountID\": \"206209005703\",\r\n    \"ClientID\": \"\",\r\n    \"Direction\": null,\r\n    \"ClasificationType\": null,\r\n    \"ProductTypeID\": null,\r\n    \"ProductID\": null,\r\n    \"SchemeID\": null,\r\n    \"OurBranchID\": \"302\",\r\n    \"LanguageID\": null,\r\n    \"BankID\": \"0\",\r\n    \"OperatorID\": null,\r\n    \"ApiActionTypeID\": 1,\r\n    \"ApiActionID\": 0,\r\n    \"ApiDynamicFields\": null,\r\n    \"ApiModuleID\": 1300,\r\n    \"ApiOperatorID\": \"HN1503\",\r\n    \"ApiOurBranchID\": \"206\",\r\n    \"ApiRequestID\": null,\r\n    \"ApiRoleID\": \"CAM\",\r\n    \"ApiUniqueID\": \"8304cd3d-f282-4457-888c-d7db933cfaa1\",\r\n    \"ApiOperatedOn\": \"16 May 2023 7:48 PM\",\r\n    \"ApiBankID\": null,\r\n    \"ApiSearchKey\": null,\r\n    \"RecentActivityModuleID\": null,\r\n    \"RecentActivityControls\": null,\r\n    \"RecentActivityControlValues\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{abc_base_url}}/api/v1/AccountMaintenance/GetAccountCustomer",
+					"host": [
+						"{{abc_base_url}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"AccountMaintenance",
+						"GetAccountCustomer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -20,7 +20,12 @@
 				<div class="panel-body">
                     {% include 'messages.html' %}
 					<form class="form-horizontal" method="post" action="">
-								<div class="col-md-12">
+                            {% if form.errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.errors }}
+                                </div>
+                            {% endif %}
+                                    <div class="col-md-12">
                                     {% csrf_token %}
                                     {% for field in form %}
 
@@ -29,7 +34,8 @@
                                     {{field}}
                                     <br>
                                     {% endfor %}
-								<button class="btn btn-sm btn-outline-success">Add Customer</button><br><br>
+                                <br>
+								<button class="btn btn-sm btn-outline-success">Add Users</button><br><br>
                                 </div>
 					</form>
 				</div>

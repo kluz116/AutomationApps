@@ -31,6 +31,9 @@ urlpatterns = [
     path('security_status', views.security_status, name='security_status'),
     path('landtitle', views.landtitle, name='landtitle'),
     path('addUsers', views.addUsers, name='addUsers'),
+    path('getUsers', views.getUsers, name='getUsers'),
+
+
 
 
 
