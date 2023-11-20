@@ -32,6 +32,8 @@ urlpatterns = [
     path('landtitle', views.landtitle, name='landtitle'),
     path('addUsers', views.addUsers, name='addUsers'),
     path('getUsers', views.getUsers, name='getUsers'),
+    path('addGroup', views.addGroup, name='addGroup'),
+    
 
 
 

@@ -1,9 +1,19 @@
 
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin,GroupAdmin
+from django.contrib.auth.models import Group
 
 from .legalDocForm import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser
+from .models import CustomUser,CustomGroup
+
+admin.site.unregister(Group)
+
+@admin.register(CustomGroup)
+class CustomGroupAdmin(GroupAdmin):
+    fieldsets = (
+        (None, {'fields': ('name', 'permissions')}),
+        (('Description'), {'fields': ('description',)}),
+    )
 
 
 class CustomUserAdmin(UserAdmin):

@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 from django.db import models
 from dateutil.relativedelta import relativedelta
 from datetime import *
@@ -18,7 +18,10 @@ class Branch(models.Model):
     def __str__(self):
         return self.name
 
-
+class CustomGroup(Group):
+    #name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_("email address"), unique=True)
     firstname = models.CharField(max_length=50,blank=True)
@@ -29,6 +32,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, blank=True, null=True)
+    group = models.ForeignKey(CustomGroup, on_delete=models.CASCADE, blank=True, null=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

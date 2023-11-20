@@ -57,18 +57,20 @@ def getBranches(request):
     branch = Branch.objects.all().order_by('-id')
     return render(request, 'branches.html', {'branch': branch})
 
-
 @login_required(login_url='/LegalDoc/')
 def addUsers(request):
-    form = CustomUserCreationForm(request.POST or None)
-    if request.POST == 'POST':
+    form = CustomUserCreationForm()
+    if request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, 'Account created successfully')
-            return HttpResponseRedirect('/LegalDoc/addBranch')
+            return HttpResponseRedirect('/LegalDoc/addUsers')
+        else:
+            form = CustomUserCreationForm()
 
-
-    return render(request, 'addUsers.html', context={'form': form})
+    context = {"form": form}
+    return render(request, "addUsers.html", context)
 
 
 @login_required(login_url='/LegalDoc/')
@@ -80,6 +82,17 @@ def addBranch(request):
             messages.success(request, "You have successfully added a branch.")
             return HttpResponseRedirect('/LegalDoc/addBranch')
     return render(request, 'addBranch.html', {'form': form})
+
+@login_required(login_url='/LegalDoc/')
+def addGroup(request):
+    form = CustomGroupForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You have successfully added a group.")
+            return HttpResponseRedirect('/LegalDoc/addGroup')
+    return render(request, 'addGroup.html', {'form': form})
+
 
 
 @login_required(login_url='/LegalDoc/')
