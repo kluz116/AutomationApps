@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'rest_framework',
-    'todo_api'
+    'todo_api',
+    'Crm'
 
 ]
 
@@ -95,10 +96,10 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'LegalDoc',
+        'NAME': 'Crm',
         'USER': 'sa',
         'PASSWORD': 'Uftladmin!',
-        'HOST': 'ICT-LP017\KLUZ',
+        'HOST': 'ICT-LP77\KLUZ',
         'PORT': '',
 
         # Dictionary. Additional database settings.

@@ -27,5 +27,6 @@ urlpatterns = [
     path('LegalDoc/', include('LegalDoc.urls')),
      path('api-auth/', include('rest_framework.urls')),
     path('todo_api/', include('todo_api.urls')),
+    path('Crm/', include('Crm.urls')),
 
 ]
