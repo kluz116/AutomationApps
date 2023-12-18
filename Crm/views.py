@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 import datetime
@@ -5,7 +6,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
-
+from .models import *
 # Create your views here.
 
 def login_request(request):
@@ -32,3 +33,8 @@ def logout_request(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/LegalDoc/')
+
+@login_required(login_url='/Crm/')
+def getCustomers(request):
+    deposits = Deposits.objects.all().order_by('-id')
+    return render(request, 'deposit.html', {'deposits': deposits})

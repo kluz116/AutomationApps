@@ -87,39 +87,32 @@
 						<thead>
 							<tr>
                                 <th class="text-nowrap">Ref</th>
-								<th class="text-nowrap">FirstName</th>
-								<th class="text-nowrap">LastName</th>
-                                <th class="text-nowrap">MiddleName</th>
-                                <th class="text-nowrap">Gender</th>
+								<th class="text-nowrap">Name</th>
+								<th class="text-nowrap">Account Name</th>
+                                <th class="text-nowrap">Branch</th>
+                                <th class="text-nowrap">Balance</th>
                                 <th class="text-nowrap">ID</th>
-                                <th class="text-nowrap">Action</th>
-                                  <th class="text-nowrap">Created By</th>
-
-                                <th class="text-nowrap">AccountID</th>
 							</tr>
 						</thead>
 						<tbody>
-						{% for obj in customer %}
+						{% for obj in deposits %}
                         <tr>
                          <td>C00{{obj.id}}</td>
-                            <td>{{obj.firstname}}</td>
-                            <td>{{obj.lastname}}</td>
-                            <td>{{obj.middlename}}</td>
-                            <td>{{obj.gender}}</td>
-                            <td>{{obj.national_id}}</td>
-
+                            <td>{{obj.name}}</td>
+                            <td>{{obj.account_number}}</td>
+                            <td>{{obj.branch}}</td>
+                            <td>{{obj.accountBalance}}</td>
                         <td>
                                 <div class="dropdown">
                                   <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                    <a class="dropdown-item" href="{% url 'updateCustomer' obj.id %}">Edit Customer</a>
+                                    <a class="dropdown-item" href="">Edit Customer</a>
                                   </div>
                                 </div>
-                            </td>
-                           <td>{{obj.created_by}}</td>
-                           <td>{{obj.bank_account}}</td>
+                        </td>
+
 
 
                         </tr>
