@@ -32,39 +32,15 @@
 						<a href="javascript:;">
 							<b class="caret"></b>
 							<i class="fa fa-users"></i>
-							<span>Customers</span>
+							<span>Customer portfolio</span>
 						</a>
 						<ul class="sub-menu">
-							<li class="active"><a href="{% url 'getCustomers' %}">Customers</a></li>
-							<li><a href="{% url 'addCustomer' %}">Add Customers</a></li>
+							<li class="active"><a href="{% url 'depositors' %}">Deposit portfolio</a></li>
+							<li><a href="">Loan portfolio</a></li>
 
 						</ul>
 					</li>
-                    <li class="has-sub">
-						<a href="javascript:;">
-							<b class="caret"></b>
-							<i class="fa fa-briefcase"></i>
-							<span>Security</span>
-						</a>
-						<ul class="sub-menu">
-							<li class="active"><a href="{% url 'getSecurity' %}">Security</a></li>
-							<li><a href="{% url 'addSecurity' %}">Add Security</a></li>
 
-						</ul>
-					</li>
-					<li class="has-sub">
-						<a href="javascript:;">
-							<b class="caret"></b>
-							<i class="fa fa-list"></i>
-							<span>Contract</span>
-						</a>
-						<ul class="sub-menu">
-							<li class="active"><a href="{% url 'getContracts' %}">Contract</a></li>
-							<li><a href="{% url 'addContract' %}">Add Contract</a></li>
-
-						</ul>
-					</li>
-					
 					<li class="has-sub active">
 						<a href="javascript:;">
 							<b class="caret"></b>
@@ -74,13 +50,6 @@
 						<ul class="sub-menu">
 							<li class="active"><a href="{% url 'getBranches' %}">Branches</a></li>
 							<li><a href="{% url 'addBranch' %}">Add Branches</a></li>
-                            <li><a href="{% url 'getSecurityType' %}">SecurityType</a></li>
-                            <li><a href="{% url 'addSecurityType' %}">Add Security Type</a></li>
-
-                             <li><a href="{% url 'getSecurityStatus' %}">Security Status</a></li>
-                            <li><a href="{% url 'addSecurityStatus' %}">Add Security Status</a></li>
-                            <li><a href="{% url 'getLandTitleType' %}">Land Title Type</a></li>
-                            <li><a href="{% url 'addLandTitleType' %}">Add Title Type</a></li>
 
 						</ul>
 

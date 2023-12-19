@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 import datetime
 import json
@@ -32,9 +32,9 @@ def login_request(request):
 def logout_request(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
-    return HttpResponseRedirect('/LegalDoc/')
+    return HttpResponseRedirect('/Crm/')
 
-@login_required(login_url='/Crm/')
-def getCustomers(request):
+
+def getDepositors(request):
     deposits = Deposits.objects.all().order_by('-id')
     return render(request, 'deposit.html', {'deposits': deposits})

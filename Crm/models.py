@@ -14,7 +14,7 @@ class Deposits(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     account_number = models.BigIntegerField(default=0)
     accountBalance = models.BigIntegerField(default=0)
-    mobile_number = models.CharField(default=0)
+    mobile_number = models.CharField(default=0,max_length=9)
 
     def __str__(self):
         return self.name

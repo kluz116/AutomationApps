@@ -4,6 +4,6 @@ from . import views
 urlpatterns = [
 
     path('', views.login_request, name='login'),
-
-
+    path('depositors', views.getDepositors, name='depositors'),
 ]
+
