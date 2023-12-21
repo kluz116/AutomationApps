@@ -25,8 +25,9 @@ from todo_api import urls as todo_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('LegalDoc/', include('LegalDoc.urls')),
-     path('api-auth/', include('rest_framework.urls')),
+    path('api-auth/', include('rest_framework.urls')),
     path('todo_api/', include('todo_api.urls')),
     path('Crm/', include('Crm.urls')),
+    path('Metropol/', include('Metropol.urls')),
 
 ]

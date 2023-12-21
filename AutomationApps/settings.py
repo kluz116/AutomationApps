@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'rest_framework',
     'todo_api',
-    'Crm'
+    'Crm',
+    'Metropol'
 
 ]
 
@@ -70,11 +71,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'AutomationApps.urls'
 AUTH_USER_MODEL = "LegalDoc.CustomUser"
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -96,10 +97,10 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'Crm',
+        'NAME': 'LegalDoc',
         'USER': 'sa',
         'PASSWORD': 'Uftladmin!',
-        'HOST': 'ICT-LP77\KLUZ',
+        'HOST': 'ICT-LP017\KLUZ',
         'PORT': '',
 
         # Dictionary. Additional database settings.
