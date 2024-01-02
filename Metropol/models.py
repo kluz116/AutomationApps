@@ -6,8 +6,9 @@ from AutomationApps import settings
 # Create your models here.
 class Cap(models.Model):
     identity_codes = [("IDT04", "Financial Card Number"), ("IDT10", "Country National ID Number"), ]
-    app_status = [("Pending", "Pending"), ("Approved", "Approved"), ("Rejected", "Rejected"), ]
-
+    app_status = [("0", "Approved"), ("1", "Cancelled by Borrower"), ("2", "Pending"),("6", "Rejected by PI"),("5", "Rejected by Borrower"), ]
+    product_types = [("0", "Guarantee"), ("1", "Hire Purchase"), ("2", "Leasing"),("3", "Letter of Credit"),("4", "Line of Credit"),("6", "Mortgage"),("7", "Overdraft"),("8", "Bond"),("9", "Revolving Credit Facility"),("10", "Unsecured Loan"),("11", "Secured Loan"),("12", "Higher Education Student’s Loan1"),("13", "Invoice Discounting"),("14", "Mobile Loan"),("15", "Small Business Recovery Fund (SBRF)2"),("16", "Agricultural Credit Facility (ACF)3"),]
+    Application_Type_Codes = [("I", "Individual"), ("B", "Business"), ]
     partner_bou_code = models.CharField(max_length=7, default='UG001')
     partner_branch_code = models.CharField(max_length=3, default='001')
     application_date = models.DateField()
@@ -18,22 +19,22 @@ class Cap(models.Model):
     currency_code = models.CharField(max_length=15, default="UGX")
     application_amount = models.CharField(max_length=15)
     application_duration = models.CharField(max_length=15)
-    product_type_code = models.CharField(max_length=15)
-    application_type_code = models.CharField(max_length=15)
+    product_type_code = models.CharField(max_length=50,choices=product_types)
+    application_type_code = models.CharField(max_length=15, choices=Application_Type_Codes)
     generate_report = models.CharField(max_length=5, default="true")
     application_status_date = models.DateField(blank=True, null=True)
     application_status_code = models.CharField(max_length=15, blank=True, null=True)
     amount_approved = models.CharField(max_length=15, blank=True, null=True)
     application_rejection_reason = models.CharField(max_length=15, blank=True, null=True)
     application_rejection_reason_code = models.CharField(max_length=15, blank=True, null=True)
-    application_status = models.CharField(max_length=15, choices=app_status, default='Pending')
+    application_status = models.CharField(max_length=15, choices=app_status, default='2')
     approved_duration = models.CharField(max_length=15, blank=True, null=True)
 
     # created_on = models.DateTimeField(default=datetime.now)
     # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
 
     def __str__(self):
-        return f'{self.identity_id_number} '
+        return f'{self.identity_id_number}'
 
 
 class Report(models.Model):
@@ -72,4 +73,4 @@ class IdentityDetail(models.Model):
 
 
     def __str__(self):
-        return f'{self.identity_number} '
+        return f'{self.identity_number}'

@@ -9,12 +9,19 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 
 
-
 from .MetropolForm import *
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
 auth_url = "https://api.metropol.co.ug:5557/api/v1/authenticate?grant_type=client_credentials"
+
+
+
+
+def getCoreApp(request):
+  
+    return render(request, 'metropol/core_applications.html', {})
+
 
 
 # Create your views here.
@@ -102,20 +109,20 @@ def addCap(request):
             res_message = res['api_code_description']
             form.save()
             messages.success(request, f'{res_message}')
-            return HttpResponseRedirect('/Metropol/')
+            return HttpResponseRedirect('/Metropol/addCap')
     return render(request, 'metropol/create_cap.html', {'form': form})
 
-
+@login_required(login_url='/Metropol/')
 def getCap(request):
     cap = Cap.objects.all().order_by('-id')
     return render(request, 'metropol/cap.html', {'cap': cap})
 
-
+@login_required(login_url='/Metropol/')
 def getIdentityDetails(request):
     obj = IdentityDetail.objects.all().order_by('-id')
     return render(request, 'metropol/identity_detail.html', {'obj': obj})
 
-
+@login_required(login_url='/Metropol/')
 def updateCap(request, id):
     sec = Cap.objects.get(id=id)
     url = "https://api.metropol.co.ug:5557/api/v1/cap"
@@ -150,12 +157,11 @@ def updateCap(request, id):
             }
 
             response = requests.request("PUT", url, headers=headers, data=payload)
-            # print(response.text)
             res = response.json()
             res_message = res['api_code_description']
             form.save()
             messages.success(request, f'{res_message}')
-            return HttpResponseRedirect('/Metropol/')
+            return HttpResponseRedirect('/Metropol/getCap')
     else:
         form = UpdateCapForm(instance=sec)
     return render(request, 'metropol/update_cap.html', {'form': form})
@@ -171,7 +177,7 @@ def pdfReport(report_reference_number):
     response = requests.request("GET", url, headers=headers, data=payload, verify=False)
     return response
 
-
+@login_required(login_url='/Metropol/')
 def generateReport(request):
     url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
     headers = {
@@ -202,7 +208,7 @@ def generateReport(request):
 
     return render(request, 'metropol/generate_report.html', {'form': form})
 
-
+@login_required(login_url='/Metropol/')
 def Identity(request):
     form = IdentityForm(request.POST or None)
     if request.method == 'POST':

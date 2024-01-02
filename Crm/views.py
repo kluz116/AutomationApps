@@ -37,4 +37,4 @@ def logout_request(request):
 
 def getDepositors(request):
     deposits = Deposits.objects.all().order_by('-id')
-    return render(request, 'deposit.html', {'deposits': deposits})
+    return render(request, 'crm/deposit.html', {'deposits': deposits})

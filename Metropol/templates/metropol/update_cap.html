@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'metropol/base.html' %}
 {% load static %}
 
 {% block content %}
@@ -13,7 +13,7 @@
 						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus"></i></a>
 						<a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-danger" data-click="panel-remove"><i class="fa fa-times"></i></a>
 					</div>
-					<h4 class="panel-title">Edit Contracts</h4>
+					<h4 class="panel-title">Update Cap</h4>
 				</div>
 				<!-- end panel-heading -->
 				<!-- begin panel-body -->
@@ -24,7 +24,7 @@
                                     {{form|crispy}}
 
                                  <br><br>
-								<button class="btn btn-sm btn-outline-success">Edit Contracts</button><br><br>
+								<button class="btn btn-sm btn-outline-success">Update Cap</button><br><br>
                                 </div>
 					</form>
 				</div>

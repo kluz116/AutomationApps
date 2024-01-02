@@ -12,6 +12,9 @@ urlpatterns = [
     path('updateCap/<int:id>/',views.updateCap,name='updateCap'),
     path('Identity', views.Identity, name='Identity'),
     path('getIdentityDetails', views.getIdentityDetails, name='getIdentityDetails'),
+    path('getCoreApp', views.getCoreApp, name='getCoreApp'),
+
+
 
 
 ]

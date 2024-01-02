@@ -92,12 +92,19 @@
 								<th class="text-nowrap">Application ID</th>
 								<th class="text-nowrap">Amount</th>
 								<th class="text-nowrap">phone</th>
-								 <th class="text-nowrap">Action</th>
+								<th class="text-nowrap">NIN</th>
+								<th class="text-nowrap">Action</th>
 								<th class="text-nowrap">application_duration</th>
 								<th class="text-nowrap">currency_code</th>
 								<th class="text-nowrap">product_type_code</th>
 								<th class="text-nowrap">application_type_code</th>
-
+								<th class="text-nowrap">application_status_date</th>
+								<th class="text-nowrap">application_status_code</th>
+								<th class="text-nowrap">amount_approved</th>
+								<th class="text-nowrap">application_rejection_reason</th>
+								<th class="text-nowrap">application_rejection_reason_code</th>
+								<th class="text-nowrap">application_status</th>
+								<th class="text-nowrap">approved_duration</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -109,6 +116,8 @@
 							<td>{{obj.partner_reference}}</td>
 							<td>{{obj.application_amount}}</td>
 							<td>{{obj.phone}}</td>
+							<td>{{obj.identity_id_number}}</td>
+							
 							<td>
                                 <div class="dropdown">
                                   <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -123,7 +132,13 @@
 							<td>{{obj.currency_code}}</td>
 							<td>{{obj.product_type_code}}</td>
 							<td>{{obj.application_type_code}}</td>
-
+							<td>{{obj.application_status_date}}</td>
+							<td>{{obj.application_status_code}}</td>
+							<td>{{obj.amount_approved}}</td>
+							<td>{{obj.application_rejection_reason}}</td>
+							<td>{{obj.application_rejection_reason_code}}</td>
+							<td>{{obj.application_status}}</td>
+							<td>{{obj.approved_duration}}</td>
                         </tr>
                         {% endfor %}
 						</tbody>

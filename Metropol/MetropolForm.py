@@ -1,7 +1,6 @@
 from Metropol.models import *
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm, password_validation
-from django.forms import HiddenInput
+
 
 
 class CapForm(forms.ModelForm):
@@ -23,13 +22,14 @@ class CapForm(forms.ModelForm):
             'partner_reference': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Application ID'}),
             'identity_id_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'National ID (NIN)'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'phone'}),
-            'currency_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'currency_code'}),
-            'application_amount': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'application_amount'}),
+            'currency_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Currency code'}),
+            'application_amount': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Application amount'}),
 
             'application_duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Duration'}),
-            'product_type_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'product type code'}),
-            'application_type_code': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'application_type_code'}),
+            'product_type_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                      'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'application_type_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                      'data-live-search': 'true', 'data-style': 'btn-white'}),
             'generate_report': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'generate_report'}),
         }
@@ -38,9 +38,7 @@ class CapForm(forms.ModelForm):
 class UpdateCapForm(forms.ModelForm):
     class Meta:
         model = Cap
-        fields = ['partner_reference', 'application_status', 'amount_approved', 'partner_bou_code',
-                  'application_status_code', 'application_status_date', 'approved_duration',
-                  'application_rejection_reason', 'application_rejection_reason_code', ]
+        fields = ['partner_reference', 'application_status', 'amount_approved','partner_bou_code','application_status_code', 'application_status_date', 'approved_duration','application_rejection_reason', 'application_rejection_reason_code', ]
 
         widgets = {
             'application_status': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',

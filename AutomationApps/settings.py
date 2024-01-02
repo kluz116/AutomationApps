@@ -96,21 +96,9 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'LegalDoc',
-        'USER': 'sa',
-        'PASSWORD': 'Uftladmin!',
-        'HOST': 'ICT-LP017\KLUZ',
-        'PORT': '',
-
-        # Dictionary. Additional database settings.
-        'OPTIONS': {
-            # String. ODBC Driver to use ("ODBC Driver 17 for SQL Server",
-            # "SQL Server Native Client 11.0", "FreeTDS" etc).
-            # Default is "ODBC Driver 17 for SQL Server".
-            'driver': 'ODBC Driver 17 for SQL Server',
-        },
-    },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'Docs',
+    }
 }
 
 
