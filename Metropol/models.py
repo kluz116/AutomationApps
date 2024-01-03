@@ -6,8 +6,13 @@ from AutomationApps import settings
 # Create your models here.
 class Cap(models.Model):
     identity_codes = [("IDT04", "Financial Card Number"), ("IDT10", "Country National ID Number"), ]
-    app_status = [("0", "Approved"), ("1", "Cancelled by Borrower"), ("2", "Pending"),("6", "Rejected by PI"),("5", "Rejected by Borrower"), ]
-    product_types = [("0", "Guarantee"), ("1", "Hire Purchase"), ("2", "Leasing"),("3", "Letter of Credit"),("4", "Line of Credit"),("6", "Mortgage"),("7", "Overdraft"),("8", "Bond"),("9", "Revolving Credit Facility"),("10", "Unsecured Loan"),("11", "Secured Loan"),("12", "Higher Education Student’s Loan1"),("13", "Invoice Discounting"),("14", "Mobile Loan"),("15", "Small Business Recovery Fund (SBRF)2"),("16", "Agricultural Credit Facility (ACF)3"),]
+    app_status = [("0", "Approved"), ("1", "Cancelled by Borrower"), ("2", "Pending"), ("6", "Rejected by PI"),
+                  ("5", "Rejected by Borrower"), ]
+    product_types = [("0", "Guarantee"), ("1", "Hire Purchase"), ("2", "Leasing"), ("3", "Letter of Credit"),
+                     ("4", "Line of Credit"), ("6", "Mortgage"), ("7", "Overdraft"), ("8", "Bond"),
+                     ("9", "Revolving Credit Facility"), ("10", "Unsecured Loan"), ("11", "Secured Loan"),
+                     ("12", "Higher Education Student’s Loan1"), ("13", "Invoice Discounting"), ("14", "Mobile Loan"),
+                     ("15", "Small Business Recovery Fund (SBRF)2"), ("16", "Agricultural Credit Facility (ACF)3"), ]
     Application_Type_Codes = [("I", "Individual"), ("B", "Business"), ]
     partner_bou_code = models.CharField(max_length=7, default='UG001')
     partner_branch_code = models.CharField(max_length=3, default='001')
@@ -19,7 +24,7 @@ class Cap(models.Model):
     currency_code = models.CharField(max_length=15, default="UGX")
     application_amount = models.CharField(max_length=15)
     application_duration = models.CharField(max_length=15)
-    product_type_code = models.CharField(max_length=50,choices=product_types)
+    product_type_code = models.CharField(max_length=50, choices=product_types)
     application_type_code = models.CharField(max_length=15, choices=Application_Type_Codes)
     generate_report = models.CharField(max_length=5, default="true")
     application_status_date = models.DateField(blank=True, null=True)
@@ -64,13 +69,13 @@ class Identity(models.Model):
 class IdentityDetail(models.Model):
     identity_number = models.CharField(max_length=15)
     fcs = models.CharField(max_length=15)
-    surname = models.CharField(max_length=150,blank=True, null=True)
-    forename1 = models.CharField(max_length=150,blank=True, null=True)
-    forename2 = models.CharField(max_length=150,blank=True, null=True)
-    forename3 = models.CharField(max_length=150,blank=True, null=True)
+    surname = models.CharField(max_length=150, blank=True, null=True)
+    forename1 = models.CharField(max_length=150, blank=True, null=True)
+    forename2 = models.CharField(max_length=150, blank=True, null=True)
+    forename3 = models.CharField(max_length=150, blank=True, null=True)
     date_of_birth = models.CharField(max_length=50)
     gender = models.CharField(max_length=150)
-
+    image = models.CharField(max_length=500, blank=True, null=True)
 
     def __str__(self):
         return f'{self.identity_number}'

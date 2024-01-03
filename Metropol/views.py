@@ -3,25 +3,30 @@ import json
 import requests
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
-
+import base64
+import os.path
+from django.core.files.base import ContentFile
 
 from .MetropolForm import *
+
+
+def handle_uploaded_file(f):
+    with open("/Users/musembya/ds/+f.name", "wb+") as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
 auth_url = "https://api.metropol.co.ug:5557/api/v1/authenticate?grant_type=client_credentials"
 
 
-
-
 def getCoreApp(request):
-  
     return render(request, 'metropol/core_applications.html', {})
-
 
 
 # Create your views here.
@@ -50,6 +55,7 @@ def logout_request(request):
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/Metropol/')
 
+
 def getBearerToken():
     url = auth_url
     payload = ""
@@ -59,6 +65,7 @@ def getBearerToken():
     response = requests.request("POST", url, headers=headers, data=payload, verify=False)
     res = response.json()
     return res['access_token']
+
 
 @login_required(login_url='/Metropol/')
 def addCap(request):
@@ -112,15 +119,18 @@ def addCap(request):
             return HttpResponseRedirect('/Metropol/addCap')
     return render(request, 'metropol/create_cap.html', {'form': form})
 
+
 @login_required(login_url='/Metropol/')
 def getCap(request):
     cap = Cap.objects.all().order_by('-id')
     return render(request, 'metropol/cap.html', {'cap': cap})
 
+
 @login_required(login_url='/Metropol/')
 def getIdentityDetails(request):
     obj = IdentityDetail.objects.all().order_by('-id')
     return render(request, 'metropol/identity_detail.html', {'obj': obj})
+
 
 @login_required(login_url='/Metropol/')
 def updateCap(request, id):
@@ -177,6 +187,7 @@ def pdfReport(report_reference_number):
     response = requests.request("GET", url, headers=headers, data=payload, verify=False)
     return response
 
+
 @login_required(login_url='/Metropol/')
 def generateReport(request):
     url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
@@ -208,6 +219,7 @@ def generateReport(request):
 
     return render(request, 'metropol/generate_report.html', {'form': form})
 
+
 @login_required(login_url='/Metropol/')
 def Identity(request):
     form = IdentityForm(request.POST or None)
@@ -226,6 +238,19 @@ def Identity(request):
             response = requests.request("GET", url, headers=headers, data=payload)
             res = response.json()
 
+            #image = base64.b64decode(res['data']['identity_info']['image'], validate=True)
+
+            img = res['data']['identity_info']['image']
+            save_path = '/Users/musembya/PycharmProjects/AutomationApps/static/images'
+            name_of_file = res['data']['identity_number']
+            file_name = name_of_file+ ".jpg"
+            completeName = os.path.join(save_path, file_name)
+
+            imgdata = base64.b64decode(img)
+            image = open(completeName, "wb")
+            image.write(imgdata)
+            image.close()
+
             passed_data = {
                 "identity_number": res['data']['identity_number'],
                 "fcs": res["data"]["other_identities"][0]["number"],
@@ -234,14 +259,16 @@ def Identity(request):
                 "forename2": res['data']['identity_info']['forename2'],
                 "forename3": res['data']['identity_info']['forename3'],
                 "date_of_birth": res['data']['identity_info']['date_of_birth'],
-                "gender": res['data']['identity_info']['gender']}
+                "gender": res['data']['identity_info']['gender'],
+                "image": file_name
+            }
 
-            messages.success(request, f'{response.json()}')
-            #obj = IdentityDetail.objects.create(identity_number, fcs, surname, forename1, forename2, forename3,
-                                                #date_of_birth, gender)
+
+            # messages.success(request, f'{response.json()}')
+            messages.success(request, image.name)
             obj = IdentityDetail.objects.create(**passed_data)
-            obj.save()
 
+            obj.save()
 
             return HttpResponseRedirect('/Metropol/getIdentityDetails')
 

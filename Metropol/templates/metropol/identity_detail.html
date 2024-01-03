@@ -94,6 +94,7 @@
 								<th class="text-nowrap">forename3</th>
 								<th class="text-nowrap">date_of_birth</th>
 								<th class="text-nowrap">gender</th>
+                                <th class="text-nowrap">Image</th>
 
 							</tr>
 						</thead>
@@ -108,6 +109,10 @@
 							<td>{{object.forename3}}</td>
 							<td>{{object.date_of_birth}}</td>
 							<td>{{object.gender}}</td>
+                            {% load static %}
+                            {% static "" as baseUrl %}
+                            <td><img src="{{ baseUrl }}/images/{{object.image}}" class="rounded-circle" height="80 px" width="80 px" alt="" /> </td>
+
 
 
 
