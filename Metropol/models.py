@@ -3,6 +3,22 @@ from django.db import models
 from AutomationApps import settings
 
 
+class BouCode(models.Model):
+    bou_code = models.CharField(max_length=30,primary_key=True)
+    
+    def __str__(self):
+        return f'{self.bou_code}'
+
+
+class BranchCode(models.Model):
+    branch_code = models.CharField(max_length=30,primary_key=True)
+    branch_name = models.CharField(max_length=50, blank=True, null=True)
+    bou_code = models.ForeignKey(BouCode, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f'{self.branch_code}'
+
+
 # Create your models here.
 class Cap(models.Model):
     identity_codes = [("IDT04", "Financial Card Number"), ("IDT10", "Country National ID Number"), ]
@@ -14,8 +30,8 @@ class Cap(models.Model):
                      ("12", "Higher Education Student’s Loan1"), ("13", "Invoice Discounting"), ("14", "Mobile Loan"),
                      ("15", "Small Business Recovery Fund (SBRF)2"), ("16", "Agricultural Credit Facility (ACF)3"), ]
     Application_Type_Codes = [("I", "Individual"), ("B", "Business"), ]
-    partner_bou_code = models.CharField(max_length=7, default='UG001')
-    partner_branch_code = models.CharField(max_length=3, default='001')
+    partner_bou_code = models.ForeignKey(BouCode, on_delete=models.CASCADE)
+    partner_branch_code = models.ForeignKey(BranchCode, on_delete=models.CASCADE)
     application_date = models.DateField()
     partner_reference = models.CharField(max_length=15)
     identity_id_number = models.CharField(max_length=20)
@@ -34,10 +50,10 @@ class Cap(models.Model):
     application_rejection_reason_code = models.CharField(max_length=15, blank=True, null=True)
     application_status = models.CharField(max_length=15, choices=app_status, default='2')
     approved_duration = models.CharField(max_length=15, blank=True, null=True)
-
+    
     # created_on = models.DateTimeField(default=datetime.now)
     # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
-
+    
     def __str__(self):
         return f'{self.identity_id_number}'
 
@@ -52,7 +68,7 @@ class Report(models.Model):
     identity_type = models.CharField(max_length=15, choices=identity_codes)
     report_pull_reason = models.CharField(max_length=15, choices=pull_reason)
     report_type = models.CharField(max_length=15, choices=report_type)
-
+    
     def __str__(self):
         return f'{self.identity_number} '
 
@@ -61,7 +77,7 @@ class Identity(models.Model):
     identity_codes = [("4", "Financial Card Number"), ("10", "Country National ID Number"), ]
     identity_number = models.CharField(max_length=15)
     identity_type = models.CharField(max_length=15, choices=identity_codes)
-
+    
     def __str__(self):
         return f'{self.identity_number} '
 
@@ -76,6 +92,7 @@ class IdentityDetail(models.Model):
     date_of_birth = models.CharField(max_length=50)
     gender = models.CharField(max_length=150)
     image = models.CharField(max_length=500, blank=True, null=True)
-
+    
     def __str__(self):
         return f'{self.identity_number}'
+

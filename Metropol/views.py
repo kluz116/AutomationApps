@@ -14,11 +14,6 @@ from django.core.files.base import ContentFile
 from .MetropolForm import *
 
 
-def handle_uploaded_file(f):
-    with open("/Users/musembya/ds/+f.name", "wb+") as destination:
-        for chunk in f.chunks():
-            destination.write(chunk)
-
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -36,7 +31,7 @@ def login_request(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-
+            
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
@@ -74,7 +69,7 @@ def addCap(request):
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
     }
-
+    
     form = CapForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -91,11 +86,11 @@ def addCap(request):
             generate_report = form['generate_report'].value()
             identity_id_number = form['identity_id_number'].value()
             identity_type_code = form['identity_type_code'].value()
-
+            
             borrower_list = [{"identity_id_number": identity_id_number,
                               "identity_type_code": identity_type_code,
                               "country_code": "UG"}]
-
+            
             payload = json.dumps({
                 "partner_bou_code": partner_bou_code,
                 "partner_branch_code": partner_branch_code,
@@ -136,7 +131,7 @@ def getIdentityDetails(request):
 def updateCap(request, id):
     sec = Cap.objects.get(id=id)
     url = "https://api.metropol.co.ug:5557/api/v1/cap"
-
+    
     if request.method == 'POST':
         form = UpdateCapForm(request.POST, instance=sec)
         if form.is_valid():
@@ -149,7 +144,7 @@ def updateCap(request, id):
             application_rejection_reason = form['application_status_code'].value()
             application_rejection_reason_code = form['application_status_code'].value()
             application_status = form['application_status'].value()
-
+            
             payload = json.dumps({
                 "amount_approved": amount_approved,
                 "application_rejection_reason": application_rejection_reason,
@@ -165,7 +160,7 @@ def updateCap(request, id):
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {getBearerToken()}'
             }
-
+            
             response = requests.request("PUT", url, headers=headers, data=payload)
             res = response.json()
             res_message = res['api_code_description']
@@ -202,21 +197,21 @@ def generateReport(request):
             identity_type_id = form['identity_type'].value()
             report_pull_reason_id = form['report_pull_reason'].value()
             report_type_id = form['report_type'].value()
-
+            
             payload = json.dumps({
                 "identity_id_number": identity_id_number,
                 "identity_type_id": identity_type_id,
                 "report_pull_reason_id": report_pull_reason_id,
                 "report_type_id": report_type_id
             }, indent=4)
-
+            
             response = requests.request("POST", url, headers=headers, data=payload)
             res = response.json()
             report_reference_number = res['data']['report_reference_number']
             res = pdfReport(report_reference_number)
             generated_rpt = HttpResponse(res.content, content_type='application/pdf')
             return generated_rpt
-
+    
     return render(request, 'metropol/generate_report.html', {'form': form})
 
 
@@ -227,49 +222,97 @@ def Identity(request):
         if form.is_valid():
             identity_id_number = form['identity_number'].value()
             identity_type_id = form['identity_type'].value()
-
+            
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {getBearerToken()}'
             }
             url = f"https://api.metropol.co.ug:5557/api/v1/identity/verify?identity_number={identity_id_number}&identity_type_id={identity_type_id}"
-
+            
             payload = {}
             response = requests.request("GET", url, headers=headers, data=payload)
             res = response.json()
-
-            #image = base64.b64decode(res['data']['identity_info']['image'], validate=True)
-
+            
+            # image = base64.b64decode(res['data']['identity_info']['image'], validate=True)
+            
             img = res['data']['identity_info']['image']
-            save_path = '/Users/musembya/PycharmProjects/AutomationApps/static/images'
+            save_path = '/Users/musembya/PycharmProjects/AutomationApps/Metropol/static/images'
             name_of_file = res['data']['identity_number']
-            file_name = name_of_file+ ".jpg"
+            file_name = name_of_file + ".jpg"
             completeName = os.path.join(save_path, file_name)
-
+            
             imgdata = base64.b64decode(img)
             image = open(completeName, "wb")
             image.write(imgdata)
             image.close()
-
-            passed_data = {
-                "identity_number": res['data']['identity_number'],
-                "fcs": res["data"]["other_identities"][0]["number"],
-                "surname": res['data']['identity_info']['surname'],
-                "forename1": res['data']['identity_info']['forename1'],
-                "forename2": res['data']['identity_info']['forename2'],
-                "forename3": res['data']['identity_info']['forename3'],
-                "date_of_birth": res['data']['identity_info']['date_of_birth'],
-                "gender": res['data']['identity_info']['gender'],
-                "image": file_name
-            }
-
-
-            # messages.success(request, f'{response.json()}')
-            messages.success(request, image.name)
-            obj = IdentityDetail.objects.create(**passed_data)
-
-            obj.save()
-
-            return HttpResponseRedirect('/Metropol/getIdentityDetails')
-
+            
+            if identity_type_id == '10':
+                passed_data = {
+                    "identity_number": res['data']['identity_number'],
+                    "fcs": res["data"]["other_identities"][0]["number"],
+                    "surname": res['data']['identity_info']['surname'],
+                    "forename1": res['data']['identity_info']['forename1'],
+                    "forename2": res['data']['identity_info']['forename2'],
+                    "forename3": res['data']['identity_info']['forename3'],
+                    "date_of_birth": res['data']['identity_info']['date_of_birth'],
+                    "gender": res['data']['identity_info']['gender'],
+                    "image": file_name
+                }
+                
+                
+                res_message = res['api_code_description']
+                messages.success(request, f'{res_message}')
+                obj = IdentityDetail.objects.create(**passed_data)
+                obj.save()
+                
+                return HttpResponseRedirect('/Metropol/getIdentityDetails')
+            else:
+                passed_info = {
+                    "identity_number": res["data"]["other_identities"][0]["number"],
+                    "fcs": res['data']['identity_number'],
+                    "surname": res['data']['identity_info']['surname'],
+                    "forename1": res['data']['identity_info']['forename1'],
+                    "forename2": res['data']['identity_info']['forename2'],
+                    "forename3": res['data']['identity_info']['forename3'],
+                    "date_of_birth": res['data']['identity_info']['date_of_birth'],
+                    "gender": res['data']['identity_info']['gender'],
+                    "image": file_name
+                }
+                print('hmmmmmmm4')
+                
+                res_message = res['api_code_description']
+                messages.success(request, f'{res_message}')
+                obj = IdentityDetail.objects.create(**passed_info)
+                obj.save()
+                
+                return HttpResponseRedirect('/Metropol/getIdentityDetails')
+    
     return render(request, 'metropol/generate_identity.html', {'form': form})
+
+
+@login_required(login_url='/Metropol/')
+def addBranch(request):
+    form = BranchCodeForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You have successfully added a branch.")
+            return HttpResponseRedirect('/Metropol/addBranch')
+    return render(request, 'metropol/addBranch.html', {'form': form})
+
+
+@login_required(login_url='/Metropol/')
+def addBoucode(request):
+    form = BouCodeForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "You have successfully added code.")
+            return HttpResponseRedirect('/Metropol/addBoucode')
+    return render(request, 'metropol/addBouCode.html', {'form': form})
+
+@login_required(login_url='/Metropol/')
+def getBranches(request):
+    branch = BranchCode.objects.all()
+    return render(request, 'metropol/branches.html', {'branch': branch})
+

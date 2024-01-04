@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'Docs',
+        'NAME': 'Crb',
     }
 }
 
