@@ -21,7 +21,7 @@ from django.urls import path, re_path
 from django.contrib import admin
 from django.urls import path,include
 from todo_api import urls as todo_urls
-
+from AutomationApps.api import api
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('LegalDoc/', include('LegalDoc.urls')),
@@ -29,5 +29,6 @@ urlpatterns = [
     path('todo_api/', include('todo_api.urls')),
     path('Crm/', include('Crm.urls')),
     path('Metropol/', include('Metropol.urls')),
+    path("api/", api.urls),  # <---------- !
 
 ]

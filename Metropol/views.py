@@ -12,12 +12,11 @@ import os.path
 from django.core.files.base import ContentFile
 
 from .MetropolForm import *
-
-
+from .api_urls import nimble_url, auth_url, report_url
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
-auth_url = "https://api.metropol.co.ug:5557/api/v1/authenticate?grant_type=client_credentials"
+auth_url = auth_url
 
 
 def getCoreApp(request):
@@ -49,6 +48,24 @@ def logout_request(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/Metropol/')
+
+
+def getNimbleToken():
+    url = nimble_url
+    
+    payload = json.dumps({
+        "userID": "DK0657",
+        "password": "New@1234",
+        "branchID": "206",
+        "systemID": ""
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    response = requests.request("POST", url, headers=headers, data=payload)
+    
+    res = response.json()
 
 
 def getBearerToken():
@@ -173,7 +190,7 @@ def updateCap(request, id):
 
 
 def pdfReport(report_reference_number):
-    url = f"https://api.metropol.co.ug:5557/api/v1/reports/credit_report/pdf?report_reference_number={report_reference_number}"
+    url = f"{report_url}={report_reference_number}"
     payload = {}
     headers = {
         'Content-Type': 'application/pdf',
@@ -259,7 +276,6 @@ def Identity(request):
                     "image": file_name
                 }
                 
-                
                 res_message = res['api_code_description']
                 messages.success(request, f'{res_message}')
                 obj = IdentityDetail.objects.create(**passed_data)
@@ -311,8 +327,8 @@ def addBoucode(request):
             return HttpResponseRedirect('/Metropol/addBoucode')
     return render(request, 'metropol/addBouCode.html', {'form': form})
 
+
 @login_required(login_url='/Metropol/')
 def getBranches(request):
     branch = BranchCode.objects.all()
     return render(request, 'metropol/branches.html', {'branch': branch})
-
