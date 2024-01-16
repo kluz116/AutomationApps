@@ -12,7 +12,7 @@ import os.path
 from django.core.files.base import ContentFile
 
 from .MetropolForm import *
-from .api_urls import nimble_url, auth_url, report_url
+from .api_urls import nimble_url, auth_url, report_url, identity_path
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -253,7 +253,7 @@ def Identity(request):
             # image = base64.b64decode(res['data']['identity_info']['image'], validate=True)
             
             img = res['data']['identity_info']['image']
-            save_path = '/Users/musembya/PycharmProjects/AutomationApps/Metropol/static/images'
+            save_path = identity_path
             name_of_file = res['data']['identity_number']
             file_name = name_of_file + ".jpg"
             completeName = os.path.join(save_path, file_name)
