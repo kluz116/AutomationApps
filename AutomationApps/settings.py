@@ -90,13 +90,20 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'Crb',
-    }
+        'ENGINE': 'mssql',
+        'NAME': 'Metropol',
+        'USER': 'sa',
+        'PASSWORD': 'Uftladmin!',
+        'HOST': 'ICT-LP017\KLUZ',
+        'PORT': '',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
+    },
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

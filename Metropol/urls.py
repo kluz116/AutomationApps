@@ -12,11 +12,9 @@ urlpatterns = [
     path('updateCap/<int:id>/',views.updateCap,name='updateCap'),
     path('Identity', views.Identity, name='Identity'),
     path('getIdentityDetails', views.getIdentityDetails, name='getIdentityDetails'),
-    path('getCoreApp', views.getCoreApp, name='getCoreApp'),
+    path('addNimble', views.addNimble, name='addNimble'),
     path('addBranch', views.addBranch, name='addBranch'),
     path('getBranches', views.getBranches, name='getBranches'),
     path('addBoucode', views.addBoucode,name='addBoucode')
-
-
 
 ]

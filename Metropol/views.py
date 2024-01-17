@@ -12,11 +12,31 @@ import os.path
 from django.core.files.base import ContentFile
 
 from .MetropolForm import *
-from .api_urls import nimble_url, auth_url, report_url, identity_path
+from .api_urls import nimble_url, auth_url, report_url, identity_path, JWT
+
+null = None
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
 auth_url = auth_url
+
+
+def getNin(clientID):
+    url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
+
+    payload = json.dumps({
+        "clientID": clientID,
+        "direction": 0
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {JWT}'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+
+    return res["clientQuery"][0]["passportNo"]
 
 
 def getCoreApp(request):
@@ -30,7 +50,7 @@ def login_request(request):
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
-            
+
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
@@ -52,7 +72,7 @@ def logout_request(request):
 
 def getNimbleToken():
     url = nimble_url
-    
+
     payload = json.dumps({
         "userID": "DK0657",
         "password": "New@1234",
@@ -62,9 +82,9 @@ def getNimbleToken():
     headers = {
         'Content-Type': 'application/json'
     }
-    
+
     response = requests.request("POST", url, headers=headers, data=payload)
-    
+
     res = response.json()
 
 
@@ -86,7 +106,7 @@ def addCap(request):
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
     }
-    
+
     form = CapForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -103,11 +123,11 @@ def addCap(request):
             generate_report = form['generate_report'].value()
             identity_id_number = form['identity_id_number'].value()
             identity_type_code = form['identity_type_code'].value()
-            
+
             borrower_list = [{"identity_id_number": identity_id_number,
                               "identity_type_code": identity_type_code,
                               "country_code": "UG"}]
-            
+
             payload = json.dumps({
                 "partner_bou_code": partner_bou_code,
                 "partner_branch_code": partner_branch_code,
@@ -148,7 +168,7 @@ def getIdentityDetails(request):
 def updateCap(request, id):
     sec = Cap.objects.get(id=id)
     url = "https://api.metropol.co.ug:5557/api/v1/cap"
-    
+
     if request.method == 'POST':
         form = UpdateCapForm(request.POST, instance=sec)
         if form.is_valid():
@@ -161,7 +181,7 @@ def updateCap(request, id):
             application_rejection_reason = form['application_status_code'].value()
             application_rejection_reason_code = form['application_status_code'].value()
             application_status = form['application_status'].value()
-            
+
             payload = json.dumps({
                 "amount_approved": amount_approved,
                 "application_rejection_reason": application_rejection_reason,
@@ -177,7 +197,7 @@ def updateCap(request, id):
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {getBearerToken()}'
             }
-            
+
             response = requests.request("PUT", url, headers=headers, data=payload)
             res = response.json()
             res_message = res['api_code_description']
@@ -214,22 +234,29 @@ def generateReport(request):
             identity_type_id = form['identity_type'].value()
             report_pull_reason_id = form['report_pull_reason'].value()
             report_type_id = form['report_type'].value()
-            
+
             payload = json.dumps({
                 "identity_id_number": identity_id_number,
                 "identity_type_id": identity_type_id,
                 "report_pull_reason_id": report_pull_reason_id,
                 "report_type_id": report_type_id
             }, indent=4)
-            
+
             response = requests.request("POST", url, headers=headers, data=payload)
             res = response.json()
             report_reference_number = res['data']['report_reference_number']
             res = pdfReport(report_reference_number)
             generated_rpt = HttpResponse(res.content, content_type='application/pdf')
             return generated_rpt
-    
+
     return render(request, 'metropol/generate_report.html', {'form': form})
+
+
+def getIdentityNum(string):
+    if string == null:
+        return None
+    else:
+        return string
 
 
 @login_required(login_url='/Metropol/')
@@ -239,30 +266,30 @@ def Identity(request):
         if form.is_valid():
             identity_id_number = form['identity_number'].value()
             identity_type_id = form['identity_type'].value()
-            
+
             headers = {
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {getBearerToken()}'
             }
             url = f"https://api.metropol.co.ug:5557/api/v1/identity/verify?identity_number={identity_id_number}&identity_type_id={identity_type_id}"
-            
+
             payload = {}
             response = requests.request("GET", url, headers=headers, data=payload)
             res = response.json()
-            
+
             # image = base64.b64decode(res['data']['identity_info']['image'], validate=True)
-            
+
             img = res['data']['identity_info']['image']
             save_path = identity_path
             name_of_file = res['data']['identity_number']
             file_name = name_of_file + ".jpg"
             completeName = os.path.join(save_path, file_name)
-            
+
             imgdata = base64.b64decode(img)
             image = open(completeName, "wb")
             image.write(imgdata)
             image.close()
-            
+
             if identity_type_id == '10':
                 passed_data = {
                     "identity_number": res['data']['identity_number'],
@@ -275,16 +302,18 @@ def Identity(request):
                     "gender": res['data']['identity_info']['gender'],
                     "image": file_name
                 }
-                
+
                 res_message = res['api_code_description']
                 messages.success(request, f'{res_message}')
                 obj = IdentityDetail.objects.create(**passed_data)
                 obj.save()
-                
+
                 return HttpResponseRedirect('/Metropol/getIdentityDetails')
             else:
                 passed_info = {
-                    "identity_number": res["data"]["other_identities"][0]["number"],
+                    "identity_number": res["data"]["other_identities"],
+                    # "identity_number": None,
+                    # "identity_number":getIdentityNum(res["data"]["other_identities"][0]["number"]),
                     "fcs": res['data']['identity_number'],
                     "surname": res['data']['identity_info']['surname'],
                     "forename1": res['data']['identity_info']['forename1'],
@@ -294,15 +323,15 @@ def Identity(request):
                     "gender": res['data']['identity_info']['gender'],
                     "image": file_name
                 }
-                print('hmmmmmmm4')
-                
+
                 res_message = res['api_code_description']
+                # hmm = res["data"]["other_identities"]
                 messages.success(request, f'{res_message}')
                 obj = IdentityDetail.objects.create(**passed_info)
                 obj.save()
-                
+
                 return HttpResponseRedirect('/Metropol/getIdentityDetails')
-    
+
     return render(request, 'metropol/generate_identity.html', {'form': form})
 
 
@@ -332,3 +361,94 @@ def addBoucode(request):
 def getBranches(request):
     branch = BranchCode.objects.all()
     return render(request, 'metropol/branches.html', {'branch': branch})
+
+
+@login_required(login_url='/Metropol/')
+def addNimble(request):
+    url = "http://10.255.201.148:92/api/v1/LoanApplication/GetLoanApplication"
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {JWT}'
+    }
+
+    url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
+    headers_cap = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getBearerToken()}'
+    }
+
+    form = CoreApplicationForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            OurBranchID = form['OurBranchID'].value()
+            ApplicationID = form['ApplicationID'].value()
+            #ApiOperatorID = form['ApiOperatorID'].value()
+
+            payload = json.dumps({
+                "OurBranchID": OurBranchID,
+                "ApplicationID": ApplicationID,
+                "ModuleID": "7035",
+                "ApiOperatorID": "MN1519"
+            }, indent=4)
+            response = requests.request("POST", url, headers=headers, data=payload)
+            res = response.json()
+
+
+            application_date = res["LoanApplication"][0]["ApplicationDate"]
+            partner_reference = res["LoanApplication"][0]["ApplicationID"]
+            phone = res["ClientDetail"][0]["Mobile"]
+            currency_code = res["LoanApplication"][0]["CurrencyID"]
+            application_amount = res["LoanApplication"][0]["LoanAmount"]
+            application_duration = res["LoanApplication"][0]["LoanTerm"]
+
+            borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
+                              "identity_type_code": "IDT10",
+                              "country_code": "UG"}]
+
+
+            payload_cap = json.dumps({
+                "partner_bou_code": "UG001",
+                "partner_branch_code": "001",
+                "application_date": application_date,
+                "partner_reference": partner_reference,
+                "borrowers": borrower_list,
+                "phone": phone,
+                "currency_code": currency_code,
+                "application_amount": application_amount,
+                "application_duration": application_duration,
+                "product_type_code": "7",
+                "application_type_code": "B",
+                "generate_report": "true"
+            }, indent=4)
+
+            response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
+
+            result = response.json()
+            res_message = result['api_code_description']
+
+
+            #form.save()]
+            from datetime import datetime
+            data = {
+
+                "partner_bou_code": "UG001",
+                "partner_branch_code": "001",
+                "application_date": datetime.now().date(),
+                "partner_reference": partner_reference,
+                "identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
+                "identity_type_code":"IDT04",
+                "phone": phone,
+                "currency_code": currency_code,
+                "application_amount": application_amount,
+                "application_duration": application_duration,
+                "product_type_code": "7",
+                "application_type_code": "B",
+                "generate_report": "true"
+            }
+            obj = Cap.objects.create(**data)
+            obj.save()
+            messages.success(request, f'{res_message}')
+            return HttpResponseRedirect('/Metropol/addNimble')
+    return render(request, 'metropol/core_applications.html', {'form':form})
+
