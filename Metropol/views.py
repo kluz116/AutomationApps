@@ -418,7 +418,7 @@ def addNimble(request):
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": "7",
-                "application_type_code": "B",
+                "application_type_code": "I",
                 "generate_report": "true"
             }, indent=4)
 
@@ -443,12 +443,12 @@ def addNimble(request):
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": "7",
-                "application_type_code": "B",
+                "application_type_code": "I",
                 "generate_report": "true"
             }
             obj = Cap.objects.create(**data)
             obj.save()
             messages.success(request, f'{res_message}')
-            return HttpResponseRedirect('/Metropol/addNimble')
+            return HttpResponseRedirect('/Metropol/getCap')
     return render(request, 'metropol/core_applications.html', {'form':form})
 
