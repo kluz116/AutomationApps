@@ -9,10 +9,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 import base64
 import os.path
-from django.core.files.base import ContentFile
 
 from .MetropolForm import *
-from .api_urls import nimble_url, auth_url, report_url, identity_path, JWT
+from .api_urls import nimble_url, auth_url, report_url, identity_path
+from .ApiAccessTokens import *
 
 null = None
 
@@ -30,7 +30,7 @@ def getNin(clientID):
     })
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {JWT}'
+        'Authorization': f'Bearer {getAccessToken()}'
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
@@ -68,35 +68,6 @@ def logout_request(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/Metropol/')
-
-
-def getNimbleToken():
-    url = nimble_url
-
-    payload = json.dumps({
-        "userID": "DK0657",
-        "password": "New@1234",
-        "branchID": "206",
-        "systemID": ""
-    })
-    headers = {
-        'Content-Type': 'application/json'
-    }
-
-    response = requests.request("POST", url, headers=headers, data=payload)
-
-    res = response.json()
-
-
-def getBearerToken():
-    url = auth_url
-    payload = ""
-    headers = {
-        'Authorization': 'Basic VFBsZWNQN1ZkYmxmNHl4cnJPelYxcVZvbWNPTUhzTGc6VFBXTkFKRTN2b3Q5QXgzMw=='
-    }
-    response = requests.request("POST", url, headers=headers, data=payload, verify=False)
-    res = response.json()
-    return res['access_token']
 
 
 @login_required(login_url='/Metropol/')
@@ -369,7 +340,7 @@ def addNimble(request):
 
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {JWT}'
+        'Authorization': f'Bearer {getAccessToken()}'
     }
 
     url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
@@ -383,7 +354,7 @@ def addNimble(request):
         if form.is_valid():
             OurBranchID = form['OurBranchID'].value()
             ApplicationID = form['ApplicationID'].value()
-            #ApiOperatorID = form['ApiOperatorID'].value()
+            # ApiOperatorID = form['ApiOperatorID'].value()
 
             payload = json.dumps({
                 "OurBranchID": OurBranchID,
@@ -393,7 +364,6 @@ def addNimble(request):
             }, indent=4)
             response = requests.request("POST", url, headers=headers, data=payload)
             res = response.json()
-
 
             application_date = res["LoanApplication"][0]["ApplicationDate"]
             partner_reference = res["LoanApplication"][0]["ApplicationID"]
@@ -405,7 +375,6 @@ def addNimble(request):
             borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
                               "identity_type_code": "IDT10",
                               "country_code": "UG"}]
-
 
             payload_cap = json.dumps({
                 "partner_bou_code": "UG001",
@@ -427,17 +396,17 @@ def addNimble(request):
             result = response.json()
             res_message = result['api_code_description']
 
-
-            #form.save()]
+            # form.save()]
             from datetime import datetime
             data = {
 
                 "partner_bou_code": "UG001",
                 "partner_branch_code": "001",
-                "application_date": datetime.now().date(),
+                # "application_date": datetime.now().date(),
+                "application_date": application_date,
                 "partner_reference": partner_reference,
                 "identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
-                "identity_type_code":"IDT04",
+                "identity_type_code": "IDT04",
                 "phone": phone,
                 "currency_code": currency_code,
                 "application_amount": application_amount,
@@ -450,5 +419,4 @@ def addNimble(request):
             obj.save()
             messages.success(request, f'{res_message}')
             return HttpResponseRedirect('/Metropol/getCap')
-    return render(request, 'metropol/core_applications.html', {'form':form})
-
+    return render(request, 'metropol/core_applications.html', {'form': form})

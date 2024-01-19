@@ -32,7 +32,7 @@ class Cap(models.Model):
     Application_Type_Codes = [("I", "Individual"), ("B", "Business"), ]
     partner_bou_code = models.CharField(max_length=20)
     partner_branch_code = models.CharField(max_length=20)
-    application_date = models.DateField()
+    application_date = models.DateTimeField()
     partner_reference = models.CharField(max_length=15)
     identity_id_number = models.CharField(max_length=20)
     identity_type_code = models.CharField(max_length=50, choices=identity_codes, default='IDT04')
