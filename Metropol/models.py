@@ -83,8 +83,8 @@ class Identity(models.Model):
 
 
 class IdentityDetail(models.Model):
-    identity_number = models.CharField(max_length=15)
-    fcs = models.CharField(max_length=15)
+    identity_number = models.CharField(max_length=15, blank=True, null=True)
+    fcs = models.CharField(max_length=15, blank=True, null=True)
     surname = models.CharField(max_length=150, blank=True, null=True)
     forename1 = models.CharField(max_length=150, blank=True, null=True)
     forename2 = models.CharField(max_length=150, blank=True, null=True)

@@ -232,6 +232,13 @@ def generateReport(request):
     return render(request, 'metropol/generate_report.html', {'form': form})
 
 
+def getId(id):
+    if id is None:
+        return 'NA'
+    else:
+        return id
+
+
 @login_required(login_url='/Metropol/')
 def Identity(request):
     form = IdentityForm(request.POST or None)
@@ -263,10 +270,13 @@ def Identity(request):
             image.write(imgdata)
             image.close()
             
+            
+            getIds = getId(res["data"]["other_identities"][0]["number"])
+            
             if identity_type_id == '10':
                 passed_data = {
                     "identity_number": res['data']['identity_number'],
-                    "fcs": res["data"]["other_identities"][0]["number"],
+                    "fcs": getIds,
                     "surname": res['data']['identity_info']['surname'],
                     "forename1": res['data']['identity_info']['forename1'],
                     "forename2": res['data']['identity_info']['forename2'],
@@ -284,7 +294,7 @@ def Identity(request):
                 return HttpResponseRedirect('/Metropol/getIdentityDetails')
             else:
                 passed_info = {
-                    "identity_number": res["data"]["other_identities"][0]["number"],
+                    "identity_number": getIds,
                     "fcs": res['data']['identity_number'],
                     "surname": res['data']['identity_info']['surname'],
                     "forename1": res['data']['identity_info']['forename1'],

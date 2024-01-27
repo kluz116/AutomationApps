@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'todo_api',
     'Crm',
-    'Metropol'
+    'Metropol',
+    'innovations',
 
 ]
 
