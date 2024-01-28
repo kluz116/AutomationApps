@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'Crm',
     'Metropol',
     'innovations',
+    'corsheaders',
 
 ]
 
@@ -65,10 +66,20 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_currentuser.middleware.ThreadLocalUserMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'AutomationApps.urls'
 AUTH_USER_MODEL = "LegalDoc.CustomUser"
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+"http://localhost:3000",
+"https://api.domain.com",
+"http://127.0.0.1:8000"
+]
+
+
 
 TEMPLATES = [
     {

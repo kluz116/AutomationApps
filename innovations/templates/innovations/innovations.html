@@ -46,12 +46,12 @@
 	<div id="page-container" class="fade page-sidebar-fixed page-header-fixed">
 		<!-- begin #header -->
 		 {% block header %}
-		   {% include "metropol/header.html" %}
+		   {% include "innovations/header.html" %}
 		   {% endblock %}
 		<!-- end #header -->
 
 		 {% block side_bar %}
-		   {% include "metropol/side_bar.html" %}
+		   {% include "innovations/side_bar.html" %}
 		   {% endblock %}
 		<div class="sidebar-bg"></div>
 		<!-- end #sidebar -->
@@ -61,11 +61,11 @@
 			<!-- begin breadcrumb -->
 			<ol class="breadcrumb pull-right">
 				<li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
-				<li class="breadcrumb-item active">Branches</li>
+				<li class="breadcrumb-item active">innovations</li>
 			</ol>
 			<!-- end breadcrumb -->
 			<!-- begin page-header -->
-			<h1 class="page-header"><small>Branches</small></h1>
+			<h1 class="page-header"><small>Innovations</small></h1>
 			<!-- end page-header -->
 					<!-- begin panel -->
 			<div class="panel panel-success">
@@ -86,18 +86,18 @@
 						<thead>
 							<tr>
 
-								<th class="text-nowrap">BOU Code</th>
-								<th class="text-nowrap">Branch Code</th>
-                                <th class="text-nowrap">Branch Name</th>
+								<th class="text-nowrap">Name</th>
+								<th class="text-nowrap">Email</th>
+                                <th class="text-nowrap">Description</th>
 							</tr>
 						</thead>
 						<tbody>
-						{% for obj in branch %}
+						{% for objs in obj %}
                         <tr>
 
-                            <td>{{obj.bou_code}}</td>
-                            <td>{{obj.branch_code}}</td>
-                            <td>{{obj.branch_name}}</td>
+                            <td>{{objs.name}}</td>
+                            <td>{{objs.email}}</td>
+                            <td>{{objs.description}}</td>
 
                         </tr>
                         {% endfor %}
