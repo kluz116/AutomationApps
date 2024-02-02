@@ -31,7 +31,6 @@ def closeAllSession():
 
     print(res)
 
-
 def getAccessToken():
     closeAllSession()
     url = nimble_token

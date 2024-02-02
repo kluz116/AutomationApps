@@ -51,7 +51,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'todo_api',
     'Crm',
-    'Metropol'
+    'Metropol',
+    'innovations',
+    'corsheaders',
 
 ]
 
@@ -64,6 +66,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_currentuser.middleware.ThreadLocalUserMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'AutomationApps.urls'
@@ -95,13 +99,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'Metropol',
-        'USER': 'sa',
-        'PASSWORD': 'Uftladmin!',
-        'HOST': 'ICT-LP017\KLUZ',
-        'PORT': '',
+        'Encrypt': 'no',
+        'TrustServerCertificate': 'yes',
+        'USER': 'realm',
+        'PASSWORD': 'friend',
+        'HOST': '10.255.201.179',
+        'PORT': '1433',
+
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
-        },
+
+       },
+
     },
 }
 # Password validation
@@ -142,4 +151,12 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOWED_ORIGINS = [
+"http://localhost:3000",
+"https://api.domain.com",
+"http://127.0.0.1:8000"
+]
 

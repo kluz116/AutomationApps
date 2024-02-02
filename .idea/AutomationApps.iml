@@ -20,7 +20,7 @@
       <excludeFolder url="file://$MODULE_DIR$/ven" />
       <excludeFolder url="file://$MODULE_DIR$/vens" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (AutomationApps)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (AutomationApps) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

@@ -29,6 +29,7 @@ urlpatterns = [
     path('todo_api/', include('todo_api.urls')),
     path('Crm/', include('Crm.urls')),
     path('Metropol/', include('Metropol.urls')),
+    path('innovations/', include('innovations.urls')),
     path("api/", api.urls),  # <---------- !
 
 ]
