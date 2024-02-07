@@ -87,21 +87,22 @@
 						<thead>
 							<tr>
                                 <th class="text-nowrap">Ref</th>
+								 <th class="text-nowrap">AccountID</th>
 								<th class="text-nowrap">FirstName</th>
 								<th class="text-nowrap">LastName</th>
                                 <th class="text-nowrap">MiddleName</th>
                                 <th class="text-nowrap">Gender</th>
                                 <th class="text-nowrap">ID</th>
                                 <th class="text-nowrap">Action</th>
-                                  <th class="text-nowrap">Created By</th>
+								<th class="text-nowrap">Created By</th>
 
-                                <th class="text-nowrap">AccountID</th>
 							</tr>
 						</thead>
 						<tbody>
 						{% for obj in customer %}
                         <tr>
                          <td>C00{{obj.id}}</td>
+							<td>{{obj.bank_account}}</td>
                             <td>{{obj.firstname}}</td>
                             <td>{{obj.lastname}}</td>
                             <td>{{obj.middlename}}</td>
@@ -119,7 +120,7 @@
                                 </div>
                             </td>
                            <td>{{obj.created_by}}</td>
-                           <td>{{obj.bank_account}}</td>
+
 
 
                         </tr>

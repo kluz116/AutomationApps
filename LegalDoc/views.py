@@ -7,11 +7,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .legalDocForm import *
 from django.contrib import messages
 from django.contrib.auth.models import User
+from .APIToken import getAccessToken
 from django.contrib.auth.decorators import login_required
+import  requests
 
-
+null = None
 def handle_uploaded_file(f):
-    with open("D:/uploads/+f.name", "wb+") as destination:
+    with open("/home/ftb-uat/AutomationApps/uploads/+f.name", "wb+") as destination:
         for chunk in f.chunks():
             destination.write(chunk)
 
@@ -53,7 +55,7 @@ def getCustomers(request):
 
 
 @login_required(login_url='/LegalDoc/')
-def getBranches(request):
+def getBranchesLegal(request):
     branch = Branch.objects.all().order_by('-id')
     return render(request, 'branches.html', {'branch': branch})
 
@@ -74,7 +76,7 @@ def addUsers(request):
 
 
 @login_required(login_url='/LegalDoc/')
-def addBranch(request):
+def addBranchLegal(request):
     form = BranchForm(request.POST or None)
     if request.method == 'POST':
         if form.is_valid():
@@ -339,4 +341,68 @@ def updateContract(request, id):
 def getUsers(request):
     user = CustomUser.objects.all().order_by('-id')
     return render(request, 'users.html', {'user': user})
+
+
+def getClient(clientID):
+    url = "http://10.255.201.179:8092/api/v1/ClientIdentity/GetClient"
+
+    payload = json.dumps({
+        "clientID": clientID,
+        "direction": 0
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getAccessToken()}'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+    firstname = res["clientQuery"][0]["firstName"]
+    lastName = res["clientQuery"][0]["lastName"]
+    middleName = res["clientQuery"][0]["middleName"]
+    genderID = res["clientQuery"][0]["genderID"]
+    nin = res["clientQuery"][0]["passportNo"]
+
+    data_res = {
+        "firstname":firstname,
+        "middlename": middleName,
+        "lastname":lastName,
+        "gender":genderID,
+        "national_id":nin
+    }
+
+    return data_res
+
+
+def addCustomerNimble(request):
+    form = CustomerAddNimble(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            bank_account = form['bank_account'].value()
+
+            url = "http://10.255.201.179:8092/api/v1/AccountMaintenance/GetAccountCustomer"
+
+            payload = json.dumps({
+                "AccountID": bank_account
+            })
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {getAccessToken()}'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+
+            res = response.json()
+            client_id = res["ClientDetails"][0]["ClientID"]
+            AccountID = res["ClientDetails"][0]["AccountID"]
+            clientDetails = getClient(client_id)
+            clientDetails['bank_account'] = AccountID
+            clientDetails['created_by'] = request.user
+            print(clientDetails)
+
+            obj = Customer.objects.create(**clientDetails)
+            obj.save()
+            messages.success(request, f'Successfully created customer {AccountID}')
+            return HttpResponseRedirect('/LegalDoc/getCustomers')
+
+    return render(request, 'addCustomer.html', {'form': form})
 

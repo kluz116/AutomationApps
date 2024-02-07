@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'Metropol',
+        'NAME': 'LegalDoc',
         'Encrypt': 'no',
         'TrustServerCertificate': 'yes',
         'USER': 'realm',

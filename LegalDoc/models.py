@@ -67,21 +67,24 @@ class LandTitleType(models.Model):
 
 
 class Customer(models.Model):
-    gender_list = [("Male", "Male"), ("Female", "Female"), ]
+    gender_list = [("M", "M"), ("F", "F"), ]
     customer_status = [("No", "No"), ("Yes", "Yes"), ]
     firstname = models.CharField(max_length=60)
     middlename = models.CharField(max_length=60, blank=True, null=True)
     lastname = models.CharField(max_length=60)
     gender = models.CharField(max_length=10, choices=gender_list)
     status = models.CharField(max_length=5, choices=customer_status, default='No')
-    national_id = models.CharField(max_length=12, blank=True, null=True)
+    national_id = models.CharField(max_length=15, blank=True, null=True)
     bank_account = models.CharField(max_length=20, blank=True)
     bank_tin = models.CharField(max_length=20, null=True)
     created_on = models.DateTimeField(default=datetime.now)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.firstname} {self.lastname} {self.middlename}'
+        if self.middlename is None:
+            return f'{self.firstname} {self.lastname}'
+        else:
+            return f'{self.firstname} {self.lastname} {self.middlename}'
 
 
 class Security(models.Model):

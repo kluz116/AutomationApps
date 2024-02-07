@@ -77,6 +77,25 @@ class CustomerForm(forms.ModelForm):
                        'data-live-search': 'true', 'data-style': 'btn-white', 'data-header': 'Select a Branch'})
         }
 
+class CustomerAddNimble(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = "__all__"
+        exclude = ('created_by', 'created_on', 'status','gender','firstname','middlename','lastname','national_id',
+                   'bank_tin','bank_branch')
+        widgets = {
+
+            'gender': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Gender'}),
+            'firstname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First Name'}),
+            'middlename': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Middle Name'}),
+            'lastname': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last Name'}),
+            'national_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'National ID (NIN)'}),
+            'bank_account': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'AccountID'}),
+            'bank_tin': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'TIN'}),
+            'bank_branch': forms.Select(
+                attrs={'class': 'selectpicker form-control', 'data-size': '5', 'tickIcon': 'glyphicon-ok',
+                       'data-live-search': 'true', 'data-style': 'btn-white', 'data-header': 'Select a Branch'})
+        }
 
 class SecurityTypeForm(forms.ModelForm):
     class Meta:

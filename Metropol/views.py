@@ -1,6 +1,4 @@
-import json
 
-import requests
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
@@ -11,7 +9,6 @@ import base64
 import os.path
 
 from .MetropolForm import *
-from .api_urls import nimble_url, auth_url, report_url, identity_path
 from .ApiAccessTokens import *
 
 null = None
@@ -375,6 +372,7 @@ def addNimble(request):
             borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
                               "identity_type_code": "IDT10",
                               "country_code": "UG"}]
+
 
             payload_cap = json.dumps({
                 "partner_bou_code": "UG001",
