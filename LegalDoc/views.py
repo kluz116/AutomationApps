@@ -9,13 +9,36 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .APIToken import getAccessToken
 from django.contrib.auth.decorators import login_required
-import  requests
+import requests
+import smtplib
+from email.message import EmailMessage
+from .decorators import group_required
 
 null = None
+
+
 def handle_uploaded_file(f):
     with open("/home/ftb-uat/AutomationApps/uploads/+f.name", "wb+") as destination:
+    # with open("D:/uploads/+f.name", "wb+") as destination:
+
         for chunk in f.chunks():
             destination.write(chunk)
+
+
+def sendMail(subject, content, to):
+    msg = EmailMessage()
+    msg.set_content(content)
+
+    msg['Subject'] = subject
+    msg['From'] = "cclog@financetrust.co.ug"
+    msg['To'] = to
+
+    # Send the message via our own SMTP server.
+    server = smtplib.SMTP('mail.financetrust.co.ug', 587)
+    server.starttls()
+    server.login("cclog@financetrust.co.ug", "ict+1234")
+    server.send_message(msg)
+    server.quit()
 
 
 def index(request):
@@ -42,24 +65,28 @@ def login_request(request):
     return render(request=request, template_name='login.html', context={"login_form": form})
 
 
-def logout_request(request):
+def logout_request_legal(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/LegalDoc/')
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
 def getCustomers(request):
     customer = Customer.objects.all().order_by('-id')
     return render(request, 'customers.html', {'customer': customer})
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def getBranchesLegal(request):
     branch = Branch.objects.all().order_by('-id')
     return render(request, 'branches.html', {'branch': branch})
 
+
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addUsers(request):
     form = CustomUserCreationForm()
     if request.method == "POST":
@@ -76,6 +103,7 @@ def addUsers(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addBranchLegal(request):
     form = BranchForm(request.POST or None)
     if request.method == 'POST':
@@ -85,7 +113,9 @@ def addBranchLegal(request):
             return HttpResponseRedirect('/LegalDoc/addBranch')
     return render(request, 'addBranch.html', {'form': form})
 
+
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addGroup(request):
     form = CustomGroupForm(request.POST or None)
     if request.method == 'POST':
@@ -96,8 +126,8 @@ def addGroup(request):
     return render(request, 'addGroup.html', {'form': form})
 
 
-
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin'])
 def addCustomer(request):
     form = CustomerForm(request.POST or None)
     current_datetime = datetime.datetime.now()
@@ -114,12 +144,14 @@ def addCustomer(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def getSecurityType(request):
     securitytype = SecurityType.objects.all().order_by('-id')
     return render(request, 'securitytype.html', {'securitytype': securitytype})
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addSecurityType(request):
     form = SecurityTypeForm(request.POST or None, )
     if request.method == 'POST':
@@ -131,6 +163,7 @@ def addSecurityType(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addSecurityStatus(request):
     form = SecurityStatusForm(request.POST or None)
     if request.method == 'POST':
@@ -142,12 +175,14 @@ def addSecurityStatus(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def getSecurityStatus(request):
     securitystatus = SecurityStatus.objects.all()
     return render(request, 'securitystatus.html', {'securitystatus': securitystatus})
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def addLandTitleType(request):
     form = LandTitleForm(request.POST or None)
     if request.method == 'POST':
@@ -159,6 +194,7 @@ def addLandTitleType(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def getLandTitleType(request):
     landtitletype = LandTitleType.objects.all()
     return render(request, 'LandTitle.html', {'landtitletype': landtitletype})
@@ -177,6 +213,7 @@ def landtitle(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
 def addSecurity(request):
     form = SecurityForm(request.POST, request.FILES)
     current_datetime = datetime.datetime.now()
@@ -187,6 +224,10 @@ def addSecurity(request):
             m.created_at = current_datetime
             m.save()
             # form.save()
+
+            content = f'New Security for Customer {m.client}  security type {m.security_type}, security status {m.security_status} Land Title Type {m.LandTitleType} Security Description {m.Security_Description} has been successfuly created by {request.user}'
+            sendMail(f'New Security for {m.client} has been maintained on LegalDoc', content,
+                     'allan.musembya@financetrust.co.ug')
             handle_uploaded_file(request.FILES["security_file"])
             messages.success(request, "You have successfully security.")
             return HttpResponseRedirect('/LegalDoc/addSecurity')
@@ -194,12 +235,22 @@ def addSecurity(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
 def getSecurity(request):
-    security = Security.objects.all().order_by('-id')
-    return render(request, 'security.html', {'security': security})
+
+    user_branch = request.user.branch
+    user_group = request.user.group
+
+    if str(user_group) == 'Branch':
+        security = Security.objects.filter(branch=user_branch).order_by('-id')
+        return render(request, 'security.html', {'security': security})
+    else:
+        security = Security.objects.all().order_by('-id')
+        return render(request, 'security.html', {'security': security})
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin'])
 def updateSecurity(request, id):
     sec = Security.objects.get(id=id)
 
@@ -214,6 +265,7 @@ def updateSecurity(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin'])
 def updateCustomer(request, id):
     sec = Customer.objects.get(id=id)
 
@@ -228,6 +280,7 @@ def updateCustomer(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def withdrawSecurity(request, id):
     sec = Security.objects.get(id=id)
 
@@ -242,6 +295,7 @@ def withdrawSecurity(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin'])
 def security_detail(request, id):
     security = get_object_or_404(Security, pk=id)
 
@@ -249,6 +303,7 @@ def security_detail(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def uploadSecurity(request, id):
     sec = Security.objects.get(id=id)
     if request.method == 'POST':
@@ -263,6 +318,7 @@ def uploadSecurity(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def download_file(request, file_id):
     uploaded_file = Security.objects.get(pk=file_id)
     if uploaded_file.security_file:
@@ -274,6 +330,19 @@ def download_file(request, file_id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
+def download_contract_file(request, file_id):
+    uploaded_file = Contracts.objects.get(pk=file_id)
+    if uploaded_file.contract_file:
+        response = HttpResponse(uploaded_file.contract_file, content_type='application/force-download')
+        response['Content-Disposition'] = f'attachment; filename="{uploaded_file.contract_file.name}"'
+        return response
+    else:
+        return HttpResponseRedirect('/LegalDoc/getContracts')
+
+
+@login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def sendForMortgage(request, id):
     sec = Security.objects.get(id=id)
 
@@ -288,6 +357,7 @@ def sendForMortgage(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def sentForFurtherCharges(request, id):
     sec = Security.objects.get(id=id)
 
@@ -302,6 +372,7 @@ def sentForFurtherCharges(request, id):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin'])
 def addContract(request):
     form = ContractForm(request.POST, request.FILES)
     current_datetim = datetime.datetime.now()
@@ -319,12 +390,14 @@ def addContract(request):
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def getContracts(request):
     contract = Contracts.objects.all().order_by('-id')
     return render(request, 'contracts.html', {'contract': contract})
 
 
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager'])
 def updateContract(request, id):
     sec = Contracts.objects.get(id=id)
 
@@ -337,7 +410,9 @@ def updateContract(request, id):
         form = ContractForm(instance=sec)
     return render(request, 'update_contracts.html', {'form': form})
 
+
 @login_required(login_url='/LegalDoc/')
+@group_required(['admin'])
 def getUsers(request):
     user = CustomUser.objects.all().order_by('-id')
     return render(request, 'users.html', {'user': user})
@@ -363,16 +438,17 @@ def getClient(clientID):
     nin = res["clientQuery"][0]["passportNo"]
 
     data_res = {
-        "firstname":firstname,
+        "firstname": firstname,
         "middlename": middleName,
-        "lastname":lastName,
-        "gender":genderID,
-        "national_id":nin
+        "lastname": lastName,
+        "gender": genderID,
+        "national_id": nin
     }
 
     return data_res
 
 
+@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
 def addCustomerNimble(request):
     form = CustomerAddNimble(request.POST or None)
     if request.method == 'POST':
@@ -397,12 +473,16 @@ def addCustomerNimble(request):
             clientDetails = getClient(client_id)
             clientDetails['bank_account'] = AccountID
             clientDetails['created_by'] = request.user
-            print(clientDetails)
+            firstname = clientDetails['firstname']
+            lastname = clientDetails['lastname']
 
             obj = Customer.objects.create(**clientDetails)
             obj.save()
+
+            content = f'New Customer {firstname} {lastname} with Account {AccountID} has been successfuly created by {request.user}'
+            sendMail(f'New Customer {AccountID} has been created on LegalDoc', content,
+                     'allan.musembya@financetrust.co.ug')
             messages.success(request, f'Successfully created customer {AccountID}')
             return HttpResponseRedirect('/LegalDoc/getCustomers')
 
     return render(request, 'addCustomer.html', {'form': form})
-

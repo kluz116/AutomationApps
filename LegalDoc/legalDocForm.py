@@ -282,7 +282,7 @@ class ContractForm(forms.ModelForm):
             'Description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Description'}),
             'Duration': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Duration'}),
             'Contract_value': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contract Value'}),
-            'contract_file': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contract File'}),
+            'contract_file': forms.FileInput(attrs={'class': 'form-control', 'placeholder': 'Contract File'}),
             'status': forms.Select(attrs={'class': 'form-control', 'placeholder': 'Status'}),
 
         }

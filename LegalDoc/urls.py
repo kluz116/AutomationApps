@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
 
     path('', views.login_request, name='login'),
-    path("logout_request", views.logout_request, name= "logout_request"),
+    path("logout_request_legal", views.logout_request_legal, name= "logout_request_legal"),
     path('getCustomers',views.getCustomers, name='getCustomers'),
     path('getBranchesLegal',views.getBranchesLegal, name='getBranchesLegal'),
     path('addBranchLegal', views.addBranchLegal, name='addBranchLegal'),
@@ -26,6 +26,7 @@ urlpatterns = [
     path('withdrawSecurity/<int:id>/', views.withdrawSecurity, name='withdrawSecurity'),
     path('uploadSecurity/<int:id>/', views.uploadSecurity, name='uploadSecurity'),
     path('download/<int:file_id>/', views.download_file, name='download_file'),
+    path('download_contract/<int:file_id>/', views.download_contract_file, name='download_contract_file'),
     path('sendForMortgage/<int:id>/', views.sendForMortgage, name='sendForMortgage'),
     path('sentForFurtherCharges/<int:id>/', views.sentForFurtherCharges, name='sentForFurtherCharges'),
     path('security_status', views.security_status, name='security_status'),
