@@ -36,7 +36,7 @@ def sendMail(subject, content, to):
     # Send the message via our own SMTP server.
     server = smtplib.SMTP('mail.financetrust.co.ug', 587)
     server.starttls()
-    server.login("cclog@financetrust.co.ug", "ict+1234")
+    server.login("cclog@financetrust.co.ug", "")
     server.send_message(msg)
     server.quit()
 
