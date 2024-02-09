@@ -52,6 +52,7 @@ def login_request(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
+
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
@@ -64,6 +65,25 @@ def login_request(request):
     form = AuthenticationForm()
     return render(request=request, template_name='login.html', context={"login_form": form})
 
+
+@login_required(login_url='/LegalDoc/')
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.POST)
+        if form.is_valid():
+            user = request.user
+            old_password = form.cleaned_data['old_password']
+            new_password = form.cleaned_data['new_password1']
+
+            if user.check_password(old_password):
+                user.set_password(new_password)
+                user.save()
+                return redirect('getCustomers')
+            else:
+                form.add_error('old_password', 'Incorrect old password.')
+    else:
+        form = PasswordChangeForm()
+    return render(request, 'change_password.html', {'form': form})
 
 def logout_request_legal(request):
     logout(request)
