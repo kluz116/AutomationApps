@@ -14,7 +14,7 @@ class LDAPAuthenticationForm(AuthenticationForm):
             print(password)
             user = ldap_backend.authenticate(self.request, username=username, password=password)
             print(user)
-                 #Tri<><><>******Kluz@6028********
+
             if not user:
                 raise forms.ValidationError("Invalid LDAP credentials.")
 
