@@ -19,7 +19,7 @@ null = None
 
 def handle_uploaded_file(f):
     with open("/home/ftb-uat/AutomationApps/uploads/+f.name", "wb+") as destination:
-    # with open("D:/uploads/+f.name", "wb+") as destination:
+        # with open("D:/uploads/+f.name", "wb+") as destination:
 
         for chunk in f.chunks():
             destination.write(chunk)
@@ -52,9 +52,12 @@ def login_request(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
-
             user = authenticate(username=username, password=password)
-            if user is not None:
+            print(f'User IS {user.firstname}')
+            if user is not None and user.needs_password_change:
+                login(request, user)
+                return redirect("change_password")
+            elif user is not None and user.needs_password_change is False:
                 login(request, user)
                 messages.info(request, f"You are now logged in as {username}.")
                 return redirect("getCustomers")
@@ -77,13 +80,16 @@ def change_password(request):
 
             if user.check_password(old_password):
                 user.set_password(new_password)
+                user.needs_password_change = False
                 user.save()
                 return redirect('getCustomers')
+                # return HttpResponseRedirect('/LegalDoc/')
             else:
                 form.add_error('old_password', 'Incorrect old password.')
     else:
         form = PasswordChangeForm()
     return render(request, 'change_password.html', {'form': form})
+
 
 def logout_request_legal(request):
     logout(request)
@@ -92,7 +98,7 @@ def logout_request_legal(request):
 
 
 @login_required(login_url='/LegalDoc/')
-@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
+@group_required(['admin', 'Legal Manager', 'Legal Admin', 'Branch'])
 def getCustomers(request):
     customer = Customer.objects.all().order_by('-id')
     return render(request, 'customers.html', {'customer': customer})
@@ -147,7 +153,7 @@ def addGroup(request):
 
 
 @login_required(login_url='/LegalDoc/')
-@group_required(['admin', 'Legal Manager', 'Legal Admin'])
+@group_required(['admin', 'Legal Manager', 'Legal Admin', 'Branch'])
 def addCustomer(request):
     form = CustomerForm(request.POST or None)
     current_datetime = datetime.datetime.now()
@@ -233,7 +239,7 @@ def landtitle(request):
 
 
 @login_required(login_url='/LegalDoc/')
-@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
+@group_required(['admin', 'Legal Manager', 'Legal Admin', 'Branch'])
 def addSecurity(request):
     form = SecurityForm(request.POST, request.FILES)
     current_datetime = datetime.datetime.now()
@@ -255,9 +261,8 @@ def addSecurity(request):
 
 
 @login_required(login_url='/LegalDoc/')
-@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
+@group_required(['admin', 'Legal Manager', 'Legal Admin', 'Branch'])
 def getSecurity(request):
-
     user_branch = request.user.branch
     user_group = request.user.group
 
@@ -468,7 +473,8 @@ def getClient(clientID):
     return data_res
 
 
-@group_required(['admin', 'Legal Manager', 'Legal Admin','Branch'])
+@login_required(login_url='/LegalDoc/')
+@group_required(['admin', 'Legal Manager', 'Legal Admin', 'Branch'])
 def addCustomerNimble(request):
     form = CustomerAddNimble(request.POST or None)
     if request.method == 'POST':

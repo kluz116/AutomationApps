@@ -33,6 +33,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(default=timezone.now)
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, blank=True, null=True)
     group = models.ForeignKey(CustomGroup, on_delete=models.CASCADE, blank=True, null=True)
+    needs_password_change = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

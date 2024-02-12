@@ -9,6 +9,7 @@ urlpatterns = [
     path('getBranchesLegal',views.getBranchesLegal, name='getBranchesLegal'),
     path('addBranchLegal', views.addBranchLegal, name='addBranchLegal'),
     path('addCustomerNimble', views.addCustomerNimble, name='addCustomerNimble'),
+    path('addCustomer', views.addCustomer, name='addCustomer'),
     path('getSecurityType', views.getSecurityType, name='getSecurityType'),
     path('addSecurityType', views.addSecurityType, name='addSecurityType'),
     path('addSecurityStatus', views.addSecurityStatus, name='addSecurityStatus'),
