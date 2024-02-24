@@ -1,16 +1,20 @@
 import db
-import requests
+'''import requests
 import json
 from views import getAccessToken, getBearerToken, getNin
-from models import Cap
+from models import Cap'''
 
 
 def getPendingCRB():
-    listApplicationID = list()
+
     cursor = db.conn.cursor()
     cursor.execute('select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry where status =?', 'VALIDATING')
     for row in cursor:
-        return row[1]
+        application_dic = {
+            "OurBranchID": row[0],
+            "ApplicationID": row[1]
+        }
+        return application_dic
 
 
 print(getPendingCRB())
