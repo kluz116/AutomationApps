@@ -50,6 +50,7 @@ class Cap(models.Model):
     application_rejection_reason_code = models.CharField(max_length=15, blank=True, null=True)
     application_status = models.CharField(max_length=15, choices=app_status, default='2')
     approved_duration = models.CharField(max_length=15, blank=True, null=True)
+    report_file_path = models.CharField(max_length=255, blank=True,null=True)
 
     # created_on = models.DateTimeField(default=datetime.now)
     # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)

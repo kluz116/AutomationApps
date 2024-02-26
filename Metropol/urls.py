@@ -10,6 +10,8 @@ urlpatterns = [
     path('generateReport', views.generateReport, name='generateReport'),
     path('getCap',views.getCap,name='getCap'),
     path('updateCap/<int:id>/',views.updateCap,name='updateCap'),
+    path('get_pdfreport',views.get_pdfreport,name='get_pdfreport'),
+
     path('Identity', views.Identity, name='Identity'),
     path('getIdentityDetails', views.getIdentityDetails, name='getIdentityDetails'),
     path('addNimble', views.addNimble, name='addNimble'),

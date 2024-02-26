@@ -125,7 +125,9 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="{% url 'updateCap' obj.id %}">Update Cap</a>
+									  <a class="dropdown-item" href="{% url 'get_pdfreport'  %}">View Report</a>
                                   </div>
+
                                 </div>
                             </td>
 							<td>{{obj.application_duration}}</td>

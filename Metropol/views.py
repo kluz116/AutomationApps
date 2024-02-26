@@ -1,4 +1,3 @@
-
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect
@@ -7,15 +6,28 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 import base64
 import os.path
-
+from .db import *
 from .MetropolForm import *
 from .ApiAccessTokens import *
+from django.http import FileResponse
 
 null = None
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
 auth_url = auth_url
+
+
+def write_response_to_file(response, file_path):
+    # Get the content of the HttpResponse
+    content = response.content
+
+    # Open a file in binary write mode
+    with open(file_path, 'wb') as file:
+        # Write the content to the file
+        file.write(content)
+
+    print(f"Response content written to {file_path}")
 
 
 def getNin(clientID):
@@ -373,7 +385,6 @@ def addNimble(request):
                               "identity_type_code": "IDT10",
                               "country_code": "UG"}]
 
-
             payload_cap = json.dumps({
                 "partner_bou_code": "UG001",
                 "partner_branch_code": "001",
@@ -418,3 +429,131 @@ def addNimble(request):
             messages.success(request, f'{res_message}')
             return HttpResponseRedirect('/Metropol/getCap')
     return render(request, 'metropol/core_applications.html', {'form': form})
+
+
+def getPendingCRB():
+    cursor = conn.cursor()
+    cursor.execute('select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry where status =?', 'VALIDATING')
+    for row in cursor:
+        application_dic = {
+            "OurBranchID": row[0],
+            "ApplicationID": row[1]
+        }
+        return application_dic
+
+
+res_dic = getPendingCRB()
+OurBranchID = res_dic['OurBranchID']
+ApplicationID = res_dic['ApplicationID']
+
+
+def addNimbleAuto():
+    url = "http://10.255.201.148:92/api/v1/LoanApplication/GetLoanApplication"
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getAccessToken()}'
+    }
+
+    url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
+    headers_cap = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getBearerToken()}'
+    }
+
+    payload = json.dumps({
+        "OurBranchID": OurBranchID,
+        "ApplicationID": ApplicationID,
+        "ModuleID": "7035",
+        "ApiOperatorID": "MN1519"
+    }, indent=4)
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+
+    application_date = res["LoanApplication"][0]["ApplicationDate"]
+    partner_reference = res["LoanApplication"][0]["ApplicationID"]
+    phone = res["ClientDetail"][0]["Mobile"]
+    currency_code = res["LoanApplication"][0]["CurrencyID"]
+    application_amount = res["LoanApplication"][0]["LoanAmount"]
+    application_duration = res["LoanApplication"][0]["LoanTerm"]
+
+    borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
+                      "identity_type_code": "IDT10",
+                      "country_code": "UG"}]
+
+    payload_cap = json.dumps({
+        "partner_bou_code": "UG001",
+        "partner_branch_code": "001",
+        "application_date": application_date,
+        "partner_reference": partner_reference,
+        "borrowers": borrower_list,
+        "phone": phone,
+        "currency_code": currency_code,
+        "application_amount": application_amount,
+        "application_duration": application_duration,
+        "product_type_code": "7",
+        "application_type_code": "I",
+        "generate_report": "true"
+    }, indent=4)
+
+    response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
+
+    result = response.json()
+    res_message = result['api_code_description']
+    identity_id_number = 'CM950901008P7F'
+    data = {
+
+        "partner_bou_code": "UG001",
+        "partner_branch_code": "001",
+        # "application_date": datetime.now().date(),
+        "application_date": application_date,
+        "partner_reference": partner_reference,
+        "identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
+        "identity_type_code": "IDT04",
+        "phone": phone,
+        "currency_code": currency_code,
+        "application_amount": application_amount,
+        "application_duration": application_duration,
+        "product_type_code": "7",
+        "application_type_code": "I",
+        "generate_report": "true",
+        "report_file_path": f'D:/uploads/{identity_id_number}.pdf'
+    }
+    generateReportAuto(identity_id_number)
+    obj = Cap.objects.create(**data)
+    obj.save()
+
+
+def generateReportAuto(identity_id_number):
+    url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getBearerToken()}'
+    }
+
+    identity_id_number = identity_id_number
+    identity_type_id = 10
+    report_pull_reason_id = 4
+    report_type_id = 3
+
+    payload = json.dumps({
+        "identity_id_number": identity_id_number,
+        "identity_type_id": identity_type_id,
+        "report_pull_reason_id": report_pull_reason_id,
+        "report_type_id": report_type_id
+    }, indent=4)
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+    report_reference_number = res['data']['report_reference_number']
+    res = pdfReport(report_reference_number)
+    generated_rpt = HttpResponse(res.content, content_type='application/pdf')
+    write_response_to_file(generated_rpt, f'D:/uploads/{identity_id_number}.pdf')
+
+
+def get_pdfreport(request):
+    with open('D:/uploads/CM950901008P7F.pdf', 'rb') as pdf:
+        response = HttpResponse(pdf.read(), content_type='application/pdf')
+        response['Content-Disposition'] = 'inline;filename=some_file.pdf'
+        return response
+
