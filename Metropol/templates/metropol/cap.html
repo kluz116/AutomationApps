@@ -112,9 +112,9 @@
                         <tr>
                             <td>{{obj.partner_bou_code}}</td>
 							<td>{{obj.partner_branch_code}}</td>
-							<td>{{obj.application_date}}</td>
+							<td>{{obj.application_date |date:"Y-m-d"}}</td>
 							<td>{{obj.partner_reference}}</td>
-							<td>{{obj.application_amount}}</td>
+							<td>{{obj.application_amount |floatformat:2}}</td>
 							<td>{{obj.phone}}</td>
 							<td>{{obj.identity_id_number}}</td>
 							
@@ -125,7 +125,7 @@
                                   </button>
                                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                     <a class="dropdown-item" href="{% url 'updateCap' obj.id %}">Update Cap</a>
-									  <a class="dropdown-item" href="{% url 'get_pdfreport'  %}">View Report</a>
+									  <a class="dropdown-item" href="{% url 'get_pdfreport' obj.id  %}">View Report</a>
                                   </div>
 
                                 </div>

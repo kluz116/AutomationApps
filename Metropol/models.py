@@ -38,7 +38,7 @@ class Cap(models.Model):
     identity_type_code = models.CharField(max_length=50, choices=identity_codes, default='IDT04')
     phone = models.CharField(max_length=15)
     currency_code = models.CharField(max_length=15, default="UGX")
-    application_amount = models.CharField(max_length=15)
+    application_amount = models.FloatField(max_length=15)
     application_duration = models.CharField(max_length=15)
     product_type_code = models.CharField(max_length=50, choices=product_types)
     application_type_code = models.CharField(max_length=15, choices=Application_Type_Codes)

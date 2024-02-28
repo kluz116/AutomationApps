@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 import base64
 import os.path
-from .db import *
+from .db import conn
 from .MetropolForm import *
 from .ApiAccessTokens import *
 from django.http import FileResponse
@@ -73,7 +73,7 @@ def login_request(request):
     return render(request=request, template_name='metropol/login.html', context={"login_form": form})
 
 
-def logout_request(request):
+def logout_request_metropol(request):
     logout(request)
     messages.info(request, "You have successfully logged out.")
     return HttpResponseRedirect('/Metropol/')
@@ -433,12 +433,14 @@ def addNimble(request):
 
 def getPendingCRB():
     cursor = conn.cursor()
-    cursor.execute('select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry where status =?', 'VALIDATING')
+    status = 'VALIDATING'
+    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where status = ? ',status)
     for row in cursor:
         application_dic = {
             "OurBranchID": row[0],
             "ApplicationID": row[1]
         }
+
         return application_dic
 
 
@@ -470,6 +472,7 @@ def addNimbleAuto():
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
 
+
     application_date = res["LoanApplication"][0]["ApplicationDate"]
     partner_reference = res["LoanApplication"][0]["ApplicationID"]
     phone = res["ClientDetail"][0]["Mobile"]
@@ -499,13 +502,13 @@ def addNimbleAuto():
     response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
 
     result = response.json()
-    res_message = result['api_code_description']
-    identity_id_number = 'CM950901008P7F'
+    #res_message = result['api_code_description']
+    identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
+
     data = {
 
         "partner_bou_code": "UG001",
         "partner_branch_code": "001",
-        # "application_date": datetime.now().date(),
         "application_date": application_date,
         "partner_reference": partner_reference,
         "identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
@@ -542,17 +545,19 @@ def generateReportAuto(identity_id_number):
         "report_pull_reason_id": report_pull_reason_id,
         "report_type_id": report_type_id
     }, indent=4)
-
+    file_path = '/home/ftb-uat/AutomationApps/uploads/'
+    dev_path ='D:/uploads/'
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
     report_reference_number = res['data']['report_reference_number']
     res = pdfReport(report_reference_number)
     generated_rpt = HttpResponse(res.content, content_type='application/pdf')
-    write_response_to_file(generated_rpt, f'D:/uploads/{identity_id_number}.pdf')
+    write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
 
 
-def get_pdfreport(request):
-    with open('D:/uploads/CM950901008P7F.pdf', 'rb') as pdf:
+def get_pdfreport(request,id):
+    sec = Cap.objects.get(id=id)
+    with open(f'{sec.report_file_path}', 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline;filename=some_file.pdf'
         return response
