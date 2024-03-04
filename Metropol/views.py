@@ -9,9 +9,11 @@ import os.path
 from .db import conn
 from .MetropolForm import *
 from .ApiAccessTokens import *
-from django.http import FileResponse
+
 
 null = None
+file_path = '/home/ftb-uat/AutomationApps/uploads/'
+dev_path = 'D:/uploads/'
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -46,6 +48,27 @@ def getNin(clientID):
     res = response.json()
 
     return res["clientQuery"][0]["passportNo"]
+
+
+def getFcs(clientID):
+    url = "http://10.255.201.148:92/api/v1/UserDefinableFields/GetUserFieldsData"
+
+    payload = json.dumps({
+        "ModuleID": "1090",
+        "ModuleTypeID": "C",
+        "OperatorID": "AM1361",
+        "OurBranchID": "100",
+        "RelevantID": "000176903"
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getAccessToken()}'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+
+    return res["UserData"][2]["FieldValue"]
 
 
 def getCoreApp(request):
@@ -189,6 +212,19 @@ def updateCap(request, id):
     return render(request, 'metropol/update_cap.html', {'form': form})
 
 
+@login_required(login_url='/Metropol/')
+def updateReportSettings(request, id):
+    sec = ReportSettings.objects.get(id=id)
+
+    if request.method == 'POST':
+        form = ReportFormSettings(request.POST, instance=sec)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('/Metropol/getReportSettings')
+    else:
+        form = ReportFormSettings(instance=sec)
+    return render(request, 'metropol/update_report.html', {'form': form})
+
 def pdfReport(report_reference_number):
     url = f"{report_url}={report_reference_number}"
     payload = {}
@@ -232,6 +268,17 @@ def generateReport(request):
     return render(request, 'metropol/generate_report.html', {'form': form})
 
 
+@login_required(login_url='/Metropol/')
+def addReportFormSettings(request):
+    form = ReportFormSettings(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Successfully configured settings.")
+            return HttpResponseRedirect('/Metropol/getReportSettings')
+    return render(request, 'metropol/reportsettings.html', {'form': form})
+
+
 def getIdentityNum(string):
     if string == null:
         return None
@@ -264,6 +311,7 @@ def Identity(request):
             name_of_file = res['data']['identity_number']
             file_name = name_of_file + ".jpg"
             completeName = os.path.join(save_path, file_name)
+            print('save path Allan',completeName)
 
             imgdata = base64.b64decode(img)
             image = open(completeName, "wb")
@@ -434,7 +482,7 @@ def addNimble(request):
 def getPendingCRB():
     cursor = conn.cursor()
     status = 'VALIDATING'
-    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where status = ? ',status)
+    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where status = ? ', status)
     for row in cursor:
         application_dic = {
             "OurBranchID": row[0],
@@ -447,6 +495,19 @@ def getPendingCRB():
 res_dic = getPendingCRB()
 OurBranchID = res_dic['OurBranchID']
 ApplicationID = res_dic['ApplicationID']
+
+
+def getIdentity_id_number_required(nin, fcs):
+    identity_id_number_required = ''
+    obj = ReportSettings.objects.all()
+    for objs in obj:
+        identity_type = objs.identity_type
+        if identity_type == '4':
+            identity_id_number_required = fcs
+        else:
+            identity_id_number_required = nin
+
+    return {"identity_id_number_required": identity_id_number_required, "identity_type": identity_type}
 
 
 def addNimbleAuto():
@@ -471,7 +532,6 @@ def addNimbleAuto():
     }, indent=4)
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-
 
     application_date = res["LoanApplication"][0]["ApplicationDate"]
     partner_reference = res["LoanApplication"][0]["ApplicationID"]
@@ -502,8 +562,14 @@ def addNimbleAuto():
     response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
 
     result = response.json()
-    #res_message = result['api_code_description']
+    # res_message = result['api_code_description']
+
     identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
+    fcs = getFcs(res["LoanApplication"][0]["ClientID"])
+    identity_obj = getIdentity_id_number_required(identity_id_number, fcs)
+    identity_id_number_required = identity_obj["identity_id_number_required"]
+    identity_type = identity_obj["identity_type"]
+
 
     data = {
 
@@ -520,14 +586,14 @@ def addNimbleAuto():
         "product_type_code": "7",
         "application_type_code": "I",
         "generate_report": "true",
-        "report_file_path": f'D:/uploads/{identity_id_number}.pdf'
+        "report_file_path": f'{file_path}{identity_id_number}.pdf'
     }
-    generateReportAuto(identity_id_number)
+    generateReportAuto(identity_id_number_required, identity_type)
     obj = Cap.objects.create(**data)
     obj.save()
 
 
-def generateReportAuto(identity_id_number):
+def generateReportAuto(identity_id_number, identity_type_id):
     url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
     headers = {
         'Content-Type': 'application/json',
@@ -535,7 +601,7 @@ def generateReportAuto(identity_id_number):
     }
 
     identity_id_number = identity_id_number
-    identity_type_id = 10
+    identity_type_id = identity_type_id  # 10
     report_pull_reason_id = 4
     report_type_id = 3
 
@@ -545,20 +611,26 @@ def generateReportAuto(identity_id_number):
         "report_pull_reason_id": report_pull_reason_id,
         "report_type_id": report_type_id
     }, indent=4)
-    file_path = '/home/ftb-uat/AutomationApps/uploads/'
-    dev_path ='D:/uploads/'
+
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-    report_reference_number = res['data']['report_reference_number']
-    res = pdfReport(report_reference_number)
-    generated_rpt = HttpResponse(res.content, content_type='application/pdf')
-    write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
+    if res['has_error']:
+        print(res['api_code_description'])
+    else:
+        report_reference_number = res['data']['report_reference_number']
+        res = pdfReport(report_reference_number)
+        generated_rpt = HttpResponse(res.content, content_type='application/pdf')
+        write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
 
 
-def get_pdfreport(request,id):
+def get_pdfreport(request, id):
     sec = Cap.objects.get(id=id)
     with open(f'{sec.report_file_path}', 'rb') as pdf:
         response = HttpResponse(pdf.read(), content_type='application/pdf')
         response['Content-Disposition'] = 'inline;filename=some_file.pdf'
         return response
 
+@login_required(login_url='/Metropol/')
+def getReportSettings(request):
+    obj = ReportSettings.objects.all().order_by('-id')
+    return render(request, 'metropol/report_settings.html', {'obj': obj})

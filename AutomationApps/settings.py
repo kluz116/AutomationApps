@@ -39,7 +39,7 @@ AUTHENTICATION_BACKENDS = [
     'django_python3_ldap.auth.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost','uat.financetrust.co.ug','10.255.201.112','127.0.0.1']
 
 # Application definition
 
@@ -166,3 +166,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
+# settings.py
+
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'uploads')

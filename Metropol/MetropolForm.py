@@ -14,7 +14,8 @@ class CapForm(forms.ModelForm):
             'identity_type_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                       'data-live-search': 'true', 'data-style': 'btn-white'}),
             'partner_bou_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'partner_branch_code'}),
-            'partner_branch_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'partner_branch_code'}),
+            'partner_branch_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'partner_branch_code'}),
             'application_date': forms.DateInput(
                 attrs={'type': 'date', 'placeholder': 'yyyy-mm-dd', 'class': 'form-control'}
             ),
@@ -80,6 +81,23 @@ class ReportForm(forms.ModelForm):
         }
 
 
+class ReportFormSettings(forms.ModelForm):
+    class Meta:
+        model = ReportSettings
+        fields = "__all__"
+
+        widgets = {
+            'identity_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                 'data-live-search': 'true', 'data-style': 'btn-white'}),
+
+            'report_pull_reason': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                      'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'report_type': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                               'data-live-search': 'true', 'data-style': 'btn-white'}),
+
+        }
+
+
 class IdentityForm(forms.ModelForm):
     class Meta:
         model = Identity
@@ -118,12 +136,11 @@ class BouCodeForm(forms.ModelForm):
 
 class CoreApplicationForm(forms.ModelForm):
     class Meta:
-        model=CoreApplication
+        model = CoreApplication
         fields = "__all__"
         widgets = {
             'OurBranchID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'OurBranchID'}),
             'ApplicationID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Application ID'}),
-            #'ApiOperatorID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ApiOperatorID'})
+            # 'ApiOperatorID': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ApiOperatorID'})
 
         }
-

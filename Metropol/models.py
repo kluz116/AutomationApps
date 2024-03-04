@@ -50,7 +50,7 @@ class Cap(models.Model):
     application_rejection_reason_code = models.CharField(max_length=15, blank=True, null=True)
     application_status = models.CharField(max_length=15, choices=app_status, default='2')
     approved_duration = models.CharField(max_length=15, blank=True, null=True)
-    report_file_path = models.CharField(max_length=255, blank=True,null=True)
+    report_file_path = models.CharField(max_length=255, blank=True, null=True)
 
     # created_on = models.DateTimeField(default=datetime.now)
     # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,)
@@ -66,6 +66,20 @@ class Report(models.Model):
                    ("5", "Stakeholder/Guarantor Report"), ]
     report_type = [("4", "Compact Report"), ("2", "Standard Report"), ("3", "Enhanced Report"), ("4", "Score Report"), ]
     identity_number = models.CharField(max_length=15)
+    identity_type = models.CharField(max_length=15, choices=identity_codes)
+    report_pull_reason = models.CharField(max_length=15, choices=pull_reason)
+    report_type = models.CharField(max_length=15, choices=report_type)
+
+    def __str__(self):
+        return f'{self.identity_number} '
+
+
+class ReportSettings(models.Model):
+    identity_codes = [("4", "Financial Card Number"), ("10", "Country National ID Number"), ]
+    pull_reason = [("1", "New Credit Application"), ("2", "Review Of Existing Credit"),
+                   ("3", "Customer Report Request"), ("4", "Review Existing Credit"),
+                   ("5", "Stakeholder/Guarantor Report"), ]
+    report_type = [("4", "Compact Report"), ("2", "Standard Report"), ("3", "Enhanced Report"), ("4", "Score Report"), ]
     identity_type = models.CharField(max_length=15, choices=identity_codes)
     report_pull_reason = models.CharField(max_length=15, choices=pull_reason)
     report_type = models.CharField(max_length=15, choices=report_type)
@@ -101,8 +115,4 @@ class IdentityDetail(models.Model):
 class CoreApplication(models.Model):
     OurBranchID = models.CharField(max_length=5)
     ApplicationID = models.CharField(max_length=100)
-    #ApiOperatorID = models.CharField(max_length=200, default='MN1519')
-
-
-
-
+    # ApiOperatorID = models.CharField(max_length=200, default='MN1519')
