@@ -107,7 +107,7 @@
 							<td>{{object.forename1}}</td>
 							<td>{{object.forename2}}</td>
 							<td>{{object.forename3}}</td>
-							<td>{{object.date_of_birth}}</td>
+							<td>{{object.date_of_birth |date:"Y-m-d"}}</td>
 							<td>{{object.gender}}</td>
                             {% load static %}
                             {% static "" as baseUrl %}

@@ -13,7 +13,7 @@ from .ApiAccessTokens import *
 
 null = None
 file_path = '/home/ftb-uat/AutomationApps/uploads/'
-dev_path = 'D:/uploads/'
+#file_path = 'D:/uploads/'
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -44,10 +44,14 @@ def getNin(clientID):
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
+
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
+    #print(res)
+
 
     return res["clientQuery"][0]["passportNo"]
+
 
 
 def getFcs(clientID):
@@ -260,10 +264,16 @@ def generateReport(request):
 
             response = requests.request("POST", url, headers=headers, data=payload)
             res = response.json()
-            report_reference_number = res['data']['report_reference_number']
-            res = pdfReport(report_reference_number)
-            generated_rpt = HttpResponse(res.content, content_type='application/pdf')
-            return generated_rpt
+
+            if res['has_error']:
+                res_msg= res['api_code_description']
+                messages.success(request, f'{res_msg}')
+            else:
+                report_reference_number = res['data']['report_reference_number']
+                res = pdfReport(report_reference_number)
+                generated_rpt = HttpResponse(res.content, content_type='application/pdf')
+                return  generated_rpt
+                #write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
 
     return render(request, 'metropol/generate_report.html', {'form': form})
 
@@ -311,7 +321,7 @@ def Identity(request):
             name_of_file = res['data']['identity_number']
             file_name = name_of_file + ".jpg"
             completeName = os.path.join(save_path, file_name)
-            print('save path Allan',completeName)
+
 
             imgdata = base64.b64decode(img)
             image = open(completeName, "wb")
@@ -481,8 +491,8 @@ def addNimble(request):
 
 def getPendingCRB():
     cursor = conn.cursor()
-    status = 'VALIDATING'
-    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where status = ? ', status)
+    status = 'PENDING'
+    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where MetropolStatus = ? ', status)
     for row in cursor:
         application_dic = {
             "OurBranchID": row[0],
@@ -492,6 +502,11 @@ def getPendingCRB():
         return application_dic
 
 
+def updateApplicationID(application_id):
+    cursor = conn.cursor()
+    cursor.execute('update t_CRBEnquiry set MetropolStatus = ? where  ApplicationID = ? ','SUCCESS', application_id)
+    conn.commit()
+
 res_dic = getPendingCRB()
 OurBranchID = res_dic['OurBranchID']
 ApplicationID = res_dic['ApplicationID']
@@ -499,15 +514,18 @@ ApplicationID = res_dic['ApplicationID']
 
 def getIdentity_id_number_required(nin, fcs):
     identity_id_number_required = ''
+    Identity_Type_Codes = ''
     obj = ReportSettings.objects.all()
     for objs in obj:
         identity_type = objs.identity_type
         if identity_type == '4':
             identity_id_number_required = fcs
+            Identity_Type_Codes = 'IDT04'
         else:
             identity_id_number_required = nin
+            Identity_Type_Codes = 'IDT10'
 
-    return {"identity_id_number_required": identity_id_number_required, "identity_type": identity_type}
+    return {"identity_id_number_required": identity_id_number_required, "identity_type": identity_type,'Identity_Type_Codes':Identity_Type_Codes}
 
 
 def addNimbleAuto():
@@ -530,8 +548,18 @@ def addNimbleAuto():
         "ModuleID": "7035",
         "ApiOperatorID": "MN1519"
     }, indent=4)
+
+
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
+
+    identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
+    fcs = getFcs(res["LoanApplication"][0]["ClientID"])
+    identity_obj = getIdentity_id_number_required(identity_id_number, fcs)
+
+    identity_id_number_required = identity_obj["identity_id_number_required"]
+    identity_type = identity_obj["identity_type"]
+    Identity_Type_Codes = identity_obj["Identity_Type_Codes"]
 
     application_date = res["LoanApplication"][0]["ApplicationDate"]
     partner_reference = res["LoanApplication"][0]["ApplicationID"]
@@ -540,8 +568,8 @@ def addNimbleAuto():
     application_amount = res["LoanApplication"][0]["LoanAmount"]
     application_duration = res["LoanApplication"][0]["LoanTerm"]
 
-    borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
-                      "identity_type_code": "IDT10",
+    borrower_list = [{"identity_id_number": identity_id_number_required,
+                      "identity_type_code": Identity_Type_Codes,
                       "country_code": "UG"}]
 
     payload_cap = json.dumps({
@@ -562,13 +590,14 @@ def addNimbleAuto():
     response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
 
     result = response.json()
-    # res_message = result['api_code_description']
 
-    identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
-    fcs = getFcs(res["LoanApplication"][0]["ClientID"])
-    identity_obj = getIdentity_id_number_required(identity_id_number, fcs)
-    identity_id_number_required = identity_obj["identity_id_number_required"]
-    identity_type = identity_obj["identity_type"]
+    res_message = result['api_code_description']
+    print(res_message)
+
+
+    print('identity_id_number_required',identity_id_number_required)
+    print('identity_type', identity_type)
+    print('Identity_Type_Codes', Identity_Type_Codes)
 
 
     data = {
@@ -577,8 +606,8 @@ def addNimbleAuto():
         "partner_branch_code": "001",
         "application_date": application_date,
         "partner_reference": partner_reference,
-        "identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
-        "identity_type_code": "IDT04",
+        "identity_id_number": identity_id_number_required,
+        "identity_type_code": Identity_Type_Codes,
         "phone": phone,
         "currency_code": currency_code,
         "application_amount": application_amount,
@@ -588,9 +617,11 @@ def addNimbleAuto():
         "generate_report": "true",
         "report_file_path": f'{file_path}{identity_id_number}.pdf'
     }
+
     generateReportAuto(identity_id_number_required, identity_type)
     obj = Cap.objects.create(**data)
     obj.save()
+    updateApplicationID(partner_reference)
 
 
 def generateReportAuto(identity_id_number, identity_type_id):

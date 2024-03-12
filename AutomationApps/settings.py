@@ -36,7 +36,6 @@ DEBUG = True
 
 
 AUTHENTICATION_BACKENDS = [
-    'django_python3_ldap.auth.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 ALLOWED_HOSTS = ['localhost','uat.financetrust.co.ug','10.255.201.112','127.0.0.1']
