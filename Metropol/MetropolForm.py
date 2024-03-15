@@ -45,8 +45,10 @@ class UpdateCapForm(forms.ModelForm):
         widgets = {
             'application_status': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                       'data-live-search': 'true', 'data-style': 'btn-white'}),
-            'partner_bou_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
-                                                    'data-live-search': 'true', 'data-style': 'btn-white'}),
+            #'partner_bou_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
+                                                    #'data-live-search': 'true', 'data-style': 'btn-white'}),
+            'partner_bou_code': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': 'partner_bou_code'}),
             'application_status_code': forms.TextInput(
                 attrs={'class': 'form-control', 'placeholder': 'Application status code'}),
             'application_status_date': forms.DateInput(
