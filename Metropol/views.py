@@ -6,17 +6,31 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 import base64
 import os.path
+import io as BytesIO
 from .db import conn
 from .MetropolForm import *
 from .ApiAccessTokens import *
 
 null = None
-file_path = '/home/ftb-uat/AutomationApps/uploads/'
-# file_path = 'D:/uploads/'
+# file_path = '/home/ftb-uat/AutomationApps/uploads/'
+file_path = 'D:/uploads/'
 
 requests.packages.urllib3.disable_warnings(
     requests.packages.urllib3.exceptions.InsecureRequestWarning)
 auth_url = auth_url
+
+
+def b64_to_pdf(b64content):
+    buffer = BytesIO.BytesIO()
+    content = base64.b64decode(b64content)
+    buffer.write(content)
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/pdf",
+    )
+    response['Content-Disposition'] = 'inline;filename=some_file.pdf'
+    return response
 
 
 def write_response_to_file(response, file_path):
@@ -44,10 +58,13 @@ def getClientType(clientID):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-    res_data = {"clientTypeID":res["client"][0]["clientTypeID"],"countryID":res["client"][0]["countryID"]}
+    res_data = {"clientTypeID": res["client"][0]["clientTypeID"], "countryID": res["client"][0]["countryID"]}
     return res_data
 
+
 def getNin(clientID):
+    obj = getClientType(clientID)
+    clientTypeID = obj['clientTypeID']
     url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
     payload = json.dumps({
         "clientID": clientID,
@@ -60,7 +77,9 @@ def getNin(clientID):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-    return res["clientQuery"][0]["passportNo"]
+    if clientTypeID == 'I':
+        return res["clientQuery"][0]["passportNo"]
+
 
 def getRegistrationNo(clientID):
     url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
@@ -75,6 +94,7 @@ def getRegistrationNo(clientID):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
+    print(res)
     return res["clientQuery"][0]["registratedAt"]
 
 
@@ -96,13 +116,13 @@ def getFcs(clientID):
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
 
-    res_data = {"fcs":res["UserData"][2]["FieldValue"],
-                "passport":res["UserData"][4]["FieldValue"],
-                "tin":res["UserData"][15]["FieldValue"]}
+    res_data = {"fcs": res["UserData"][2]["FieldValue"],
+                "passport": res["UserData"][4]["FieldValue"],
+                "tin": res["UserData"][15]["FieldValue"]}
 
-    #return res["UserData"][2]["FieldValue"]
+    # return res["UserData"][2]["FieldValue"]
 
-    return  res_data
+    return res_data
 
 
 def getCoreApp(request):
@@ -264,16 +284,19 @@ def pdfReport(report_reference_number):
     url = f"{report_url}={report_reference_number}"
     payload = {}
     headers = {
-        'Content-Type': 'application/pdf',
+        'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
     }
     response = requests.request("GET", url, headers=headers, data=payload, verify=False)
-    return response
+    res =response.json()
+    name_of_file = res['data']['base_64']
+
+    return name_of_file
 
 
 @login_required(login_url='/Metropol/')
 def generateReport(request):
-    url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
+    url = generate_rpt_url
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -287,10 +310,15 @@ def generateReport(request):
             report_type_id = form['report_type'].value()
 
             payload = json.dumps({
-                "identity_id_number": identity_id_number,
-                "identity_type_id": identity_type_id,
-                "report_pull_reason_id": report_pull_reason_id,
-                "report_type_id": report_type_id
+                "report_request_type_code": report_type_id,
+                "report_reason_code": report_pull_reason_id,
+                "report_identities": [
+                    {
+                        "identity_number": identity_id_number,
+                        "identity_type": identity_type_id
+                    }
+                ],
+                "institution_code": "CB026"
             }, indent=4)
 
             response = requests.request("POST", url, headers=headers, data=payload)
@@ -300,10 +328,14 @@ def generateReport(request):
                 res_msg = res['api_code_description']
                 messages.success(request, f'{res_msg}')
             else:
-                report_reference_number = res['data']['report_reference_number']
+                report_reference_number = res['data'][0]['report_details']['reference']
                 res = pdfReport(report_reference_number)
-                generated_rpt = HttpResponse(res.content, content_type='application/pdf')
-                return generated_rpt
+                buffer = BytesIO.BytesIO()
+                content = base64.b64decode(res)
+                buffer.write(content)
+
+                response = HttpResponse(buffer.getvalue(),content_type="application/pdf", )
+                return response
                 # write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
 
     return render(request, 'metropol/generate_report.html', {'form': form})
@@ -339,7 +371,7 @@ def Identity(request):
                 'Content-Type': 'application/json',
                 'Authorization': f'Bearer {getBearerToken()}'
             }
-            url = f"https://api.metropol.co.ug:5557/api/v1/identity/verify?identity_number={identity_id_number}&identity_type_id={identity_type_id}"
+            url = f"https://sandbox.analytics.metropol.co.ug/api/v3/identity/verify?identity_number={identity_id_number}&identity_type_id={identity_type_id}"
 
             payload = {}
             response = requests.request("GET", url, headers=headers, data=payload)
@@ -440,7 +472,7 @@ def addNimble__(request):
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
-    url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
+    url_cap = "https://sandbox.analytics.metropol.co.ug/api/v3/cap"
     headers_cap = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -469,23 +501,21 @@ def addNimble__(request):
             application_amount = res["LoanApplication"][0]["LoanAmount"]
             application_duration = res["LoanApplication"][0]["LoanTerm"]
 
-            borrower_list = [{"identity_id_number": getNin(res["LoanApplication"][0]["ClientID"]),
-                              "identity_type_code": "IDT10",
-                              "country_code": "UG"}]
+            borrower_list = [{"identity_number": getNin(res["LoanApplication"][0]["ClientID"]),
+                              "identity_type": "IDT10"}]
 
             payload_cap = json.dumps({
-                "partner_bou_code": "UG001",
+                "partner_bou_code": "CB026",
                 "partner_branch_code": "001",
                 "application_date": application_date,
-                "partner_reference": partner_reference,
+                "application_reference": partner_reference,
+                "customer_phone_number": phone,
                 "borrowers": borrower_list,
-                "phone": phone,
                 "currency_code": currency_code,
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": "7",
-                "application_type_code": "I",
-                "generate_report": "true"
+                "application_type_code": "B"
             }, indent=4)
 
             response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
@@ -543,27 +573,26 @@ OurBranchID = res_dic['OurBranchID']
 ApplicationID = res_dic['ApplicationID']
 
 
-def getIdentity_id_number_required(nin, fcs,clientTypeID,countryID):
+def getIdentity_id_number_required(nin, fcs, tin, passport, clientTypeID, countryID):
     identity_id_number_required = ''
     Identity_Type_Codes = ''
-    if clientTypeID == 'C' and countryID =='UG':
-        print('Company and Ugandan')
-    elif clientTypeID == 'I' and countryID =='UG':
-        print('Individual and Ugandan')
-    elif clientTypeID == 'E' and countryID =='UG':
-        print('Emproyee and Ugandan')
-    obj = ReportSettings.objects.all()
-    for objs in obj:
-        identity_type = objs.identity_type
-        if identity_type == '4':
-            identity_id_number_required = fcs
-            Identity_Type_Codes = 'IDT04'
-        else:
-            identity_id_number_required = nin
-            Identity_Type_Codes = 'IDT10'
+    if clientTypeID == 'C' and countryID == 'UG':
+        identity_id_number_required = tin  # or reg_no
+        Identity_Type_Codes = 'IDT02'
+    elif clientTypeID == 'I' and countryID == 'UG':
+        identity_id_number_required = nin
+        Identity_Type_Codes = 'IDT10'
+    elif clientTypeID == 'E' and countryID == 'UG':
+        identity_id_number_required = nin or fcs
+        Identity_Type_Codes = 'IDT10'
+    elif clientTypeID == 'I' and countryID != 'UG':
+        identity_id_number_required = passport
+        Identity_Type_Codes = 'IDT16'
 
-    return {"identity_id_number_required": identity_id_number_required, "identity_type": identity_type,
-            'Identity_Type_Codes': Identity_Type_Codes}
+    else:
+        print('We did not cater for such scenerio')
+
+    return {"identity_id_number_required": identity_id_number_required, 'Identity_Type_Codes': Identity_Type_Codes}
 
 
 def addNimble(request):
@@ -574,7 +603,7 @@ def addNimble(request):
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
-    url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
+    url_cap = "https://sandbox.analytics.metropol.co.ug/api/v3/cap"
     headers_cap = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -595,13 +624,24 @@ def addNimble(request):
 
             response = requests.request("POST", url, headers=headers, data=payload)
             res = response.json()
+            ClientID = res["LoanApplication"][0]["ClientID"]
 
-            identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
-            fcs = getFcs(res["LoanApplication"][0]["ClientID"])
-            identity_obj = getIdentity_id_number_required(identity_id_number, fcs)
+            clientType = getClientType(ClientID)
+            clientTypeID = clientType['clientTypeID']
+            countryID = clientType['countryID']
+            identity_id_number = getNin(ClientID)
+            # reg_no = getRegistrationNo(ClientID)
+            fcs_obj = getFcs(ClientID)
+
+            fsc = fcs_obj['fcs']
+            passport = fcs_obj['passport']
+            tin = fcs_obj['tin']
+
+            identity_obj = getIdentity_id_number_required(identity_id_number, fsc, tin, passport, clientTypeID,
+                                                          countryID)
 
             identity_id_number_required = identity_obj["identity_id_number_required"]
-            identity_type = identity_obj["identity_type"]
+            # identity_type = identity_obj["identity_type"]
             Identity_Type_Codes = identity_obj["Identity_Type_Codes"]
 
             application_date = res["LoanApplication"][0]["ApplicationDate"]
@@ -638,7 +678,6 @@ def addNimble(request):
             print(res_message)
 
             print('identity_id_number_required', identity_id_number_required)
-            print('identity_type', identity_type)
             print('Identity_Type_Codes', Identity_Type_Codes)
 
             data = {
@@ -659,7 +698,7 @@ def addNimble(request):
                 "report_file_path": f'{file_path}{identity_id_number}.pdf'
             }
 
-            generateReportAuto(identity_id_number_required, identity_type)
+            generateReportAuto(identity_id_number_required)
             obj = Cap.objects.create(**data)
             obj.save()
             updateApplicationID(partner_reference)
@@ -677,7 +716,7 @@ def addNimbleAuto():
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
-    url_cap = "https://api.metropol.co.ug:5557/api/v1/cap"
+    url_cap = "https://sandbox.analytics.metropol.co.ug/api/v3/cap"
     headers_cap = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -693,12 +732,26 @@ def addNimbleAuto():
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
 
-    identity_id_number = getNin(res["LoanApplication"][0]["ClientID"])
-    fcs = getFcs(res["LoanApplication"][0]["ClientID"])
-    identity_obj = getIdentity_id_number_required(identity_id_number, fcs)
+    print(res)
+
+    ClientID = res["LoanApplication"][0]["ClientID"]
+
+    clientType = getClientType(ClientID)
+    clientTypeID = clientType['clientTypeID']
+    countryID = clientType['countryID']
+    identity_id_number = getNin(ClientID)
+    #    reg_no = getRegistrationNo(ClientID)
+    fcs_obj = getFcs(ClientID)
+    fsc = fcs_obj['fcs']
+    passport = fcs_obj['passport']
+    tin = fcs_obj['tin']
+
+    print(f'The Type of client is {clientType}')
+
+    identity_obj = getIdentity_id_number_required(identity_id_number, fsc, tin, passport, clientTypeID, countryID)
 
     identity_id_number_required = identity_obj["identity_id_number_required"]
-    identity_type = identity_obj["identity_type"]
+    # identity_type = identity_obj["identity_type"]
     Identity_Type_Codes = identity_obj["Identity_Type_Codes"]
 
     application_date = res["LoanApplication"][0]["ApplicationDate"]
@@ -708,23 +761,21 @@ def addNimbleAuto():
     application_amount = res["LoanApplication"][0]["LoanAmount"]
     application_duration = res["LoanApplication"][0]["LoanTerm"]
 
-    borrower_list = [{"identity_id_number": identity_id_number_required,
-                      "identity_type_code": Identity_Type_Codes,
-                      "country_code": "UG"}]
+    borrower_list = [{"identity_number": identity_id_number_required,
+                      "identity_type": Identity_Type_Codes}]
 
     payload_cap = json.dumps({
-        "partner_bou_code": "UG001",
+        "partner_bou_code": "CB026",
         "partner_branch_code": "001",
         "application_date": application_date,
-        "partner_reference": partner_reference,
+        "application_reference": partner_reference,
+        "customer_phone_number": phone,
         "borrowers": borrower_list,
-        "phone": phone,
         "currency_code": currency_code,
         "application_amount": application_amount,
         "application_duration": application_duration,
         "product_type_code": "7",
-        "application_type_code": "I",
-        "generate_report": "true"
+        "application_type_code": "B"
     }, indent=4)
 
     response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
@@ -735,7 +786,6 @@ def addNimbleAuto():
     print(res_message)
 
     print('identity_id_number_required', identity_id_number_required)
-    print('identity_type', identity_type)
     print('Identity_Type_Codes', Identity_Type_Codes)
 
     data = {
@@ -756,39 +806,54 @@ def addNimbleAuto():
         "report_file_path": f'{file_path}{identity_id_number_required}.pdf'
     }
 
-    generateReportAuto(identity_id_number_required, identity_type)
+    generateReportAuto(identity_id_number_required)
     obj = Cap.objects.create(**data)
     obj.save()
     updateApplicationID(partner_reference)
 
 
-def generateReportAuto(identity_id_number, identity_type_id):
-    url = "https://api.metropol.co.ug:5557/api/v1/reports/generate_report"
+def generateReportAuto(identity_id_number):
+    url = generate_rpt_url
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
     }
 
     identity_id_number = identity_id_number
-    identity_type_id = identity_type_id  # 10
+    identity_type_id = 'IDT10'
     report_pull_reason_id = 4
     report_type_id = 3
 
     payload = json.dumps({
-        "identity_id_number": identity_id_number,
-        "identity_type_id": identity_type_id,
-        "report_pull_reason_id": report_pull_reason_id,
-        "report_type_id": report_type_id
+        "report_request_type_code": "CR03",
+        "report_reason_code": "RP01",
+        "report_identities": [
+            {
+                "identity_number": identity_id_number,
+                "identity_type": identity_type_id
+            }
+        ],
+        "institution_code": "CB026"
     }, indent=4)
-
+    print('identity_id_number', identity_id_number)
+    print('identity_id_number', identity_type_id)
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
+    print(f'This is a response Allan {res}')
+    print(f'Payload : {payload}')
     if res['has_error']:
         print(res['api_code_description'])
     else:
-        report_reference_number = res['data']['report_reference_number']
+        #report_reference_number = res['data']['reference']
+        #res = pdfReport(report_reference_number)
+        #generated_rpt = HttpResponse(res.content, content_type='application/pdf')
+        report_reference_number = res['data'][0]['report_details']['reference']
         res = pdfReport(report_reference_number)
-        generated_rpt = HttpResponse(res.content, content_type='application/pdf')
+        buffer = BytesIO.BytesIO()
+        content = base64.b64decode(res)
+        buffer.write(content)
+
+        generated_rpt = HttpResponse(buffer.getvalue(), content_type="application/pdf", )
         write_response_to_file(generated_rpt, f'{file_path}{identity_id_number}.pdf')
 
 

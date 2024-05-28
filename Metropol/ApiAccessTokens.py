@@ -7,8 +7,9 @@ def getBearerToken():
     url = auth_url
     payload = ""
     headers = {
-        'Authorization': 'Basic VFBsZWNQN1ZkYmxmNHl4cnJPelYxcVZvbWNPTUhzTGc6VFBXTkFKRTN2b3Q5QXgzMw=='
+        'Authorization': 'Basic dmI2RGNHNmRuRG92cUw3MnlNUktkNHo5OW9LblBjUUo6TkZLOTlYSHYzNXJrb0l1bA=='
     }
+
     response = requests.request("POST", url, headers=headers, data=payload, verify=False)
     res = response.json()
     return res['access_token']

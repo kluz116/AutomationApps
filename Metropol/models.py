@@ -21,7 +21,7 @@ class BranchCode(models.Model):
 
 # Create your models here.
 class Cap(models.Model):
-    identity_codes = [("IDT04", "Financial Card Number"), ("IDT10", "Country National ID Number"), ]
+    identity_codes = [("IDT01","Registration Number"),("IDT02","Tax Identification Number"),("IDT04", "Financial Card Number"),("IDT05", "Passport Number"),("IDT10","National Identity Number"),("IDT16", "Refugee Number"),("IDT17", "Work Permit Number"), ]
     app_status = [("0", "Approved"), ("1", "Cancelled by Borrower"), ("2", "Pending"), ("6", "Rejected by PI"),
                   ("5", "Rejected by Borrower"), ]
     product_types = [("0", "Guarantee"), ("1", "Hire Purchase"), ("2", "Leasing"), ("3", "Letter of Credit"),
@@ -60,11 +60,15 @@ class Cap(models.Model):
 
 
 class Report(models.Model):
-    identity_codes = [("4", "Financial Card Number"), ("10", "Country National ID Number"), ]
-    pull_reason = [("1", "New Credit Application"), ("2", "Review Of Existing Credit"),
-                   ("3", "Customer Report Request"), ("4", "Review Existing Credit"),
-                   ("5", "Stakeholder/Guarantor Report"), ]
-    report_type = [("4", "Compact Report"), ("2", "Standard Report"), ("3", "Enhanced Report"), ("4", "Score Report"), ]
+    identity_codes = [("IDT01", "Registration Number"), ("IDT02", "Tax Identification Number"),
+                      ("IDT04", "Financial Card Number"), ("IDT05", "Passport Number"),
+                      ("IDT10", "National Identity Number"), ("IDT16", "Refugee Number"),
+                      ("IDT17", "Work Permit Number"), ]
+    pull_reason = [("RP01", "New Credit Application"), ("RP02", "Review Of Existing Credit"),
+                   ("RP03", "Customer Report Request"),
+                   ("RP05", "Stakeholder/Guarantor Report"), ]
+    report_type = [("CR01", "Compact Report"), ("CR02", "Standard Report"), ("CR03", "Enhanced Report"),
+                   ("CR04", "Score Report"), ("CR06", "Identification Report"), ]
     identity_number = models.CharField(max_length=15)
     identity_type = models.CharField(max_length=15, choices=identity_codes)
     report_pull_reason = models.CharField(max_length=15, choices=pull_reason)
@@ -75,11 +79,11 @@ class Report(models.Model):
 
 
 class ReportSettings(models.Model):
-    identity_codes = [("4", "Financial Card Number"), ("10", "Country National ID Number"), ]
-    pull_reason = [("1", "New Credit Application"), ("2", "Review Of Existing Credit"),
-                   ("3", "Customer Report Request"), ("4", "Review Existing Credit"),
-                   ("5", "Stakeholder/Guarantor Report"), ]
-    report_type = [("4", "Compact Report"), ("2", "Standard Report"), ("3", "Enhanced Report"), ("4", "Score Report"), ]
+    identity_codes = [("IDT01","Registration Number"),("IDT02","Tax Identification Number"),("IDT04", "Financial Card Number"),("IDT05", "Passport Number"),("IDT10","National Identity Number"),("IDT16", "Refugee Number"),("IDT17", "Work Permit Number"), ]
+    pull_reason = [("RP01", "New Credit Application"), ("RP02", "Review Of Existing Credit"),
+                   ("RP03", "Customer Report Request"),
+                   ("RP05", "Stakeholder/Guarantor Report"), ]
+    report_type = [("CR01", "Compact Report"), ("CR02", "Standard Report"), ("CR03", "Enhanced Report"), ("CR04", "Score Report"), ("CR06", "Identification Report"), ]
     identity_type = models.CharField(max_length=15, choices=identity_codes)
     report_pull_reason = models.CharField(max_length=15, choices=pull_reason)
     report_type = models.CharField(max_length=15, choices=report_type)
@@ -89,7 +93,7 @@ class ReportSettings(models.Model):
 
 
 class Identity(models.Model):
-    identity_codes = [("4", "Financial Card Number"), ("10", "Country National ID Number"), ]
+    identity_codes = [("IDT01","Registration Number"),("IDT02","Tax Identification Number"),("IDT04", "Financial Card Number"),("IDT05", "Passport Number"),("IDT10","National Identity Number"),("IDT16", "Refugee Number"),("IDT17", "Work Permit Number"), ]
     identity_number = models.CharField(max_length=15)
     identity_type = models.CharField(max_length=15, choices=identity_codes)
 

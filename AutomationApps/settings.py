@@ -108,7 +108,7 @@ DATABASES = {
         'USER': 'realm',
         'PASSWORD': 'friend',
         'HOST': '10.255.201.179',
-        'PORT': '1433',
+        'PORT': '1629',
 
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
