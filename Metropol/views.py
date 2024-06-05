@@ -46,7 +46,7 @@ def write_response_to_file(response, file_path):
 
 
 def getClientType(clientID):
-    url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
+    url = get_client_url
     payload = json.dumps({
         "clientID": clientID,
         "direction": 0
@@ -65,7 +65,7 @@ def getClientType(clientID):
 def getNin(clientID):
     obj = getClientType(clientID)
     clientTypeID = obj['clientTypeID']
-    url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
+    url = get_nin_url
     payload = json.dumps({
         "clientID": clientID,
         "direction": 0
@@ -82,7 +82,7 @@ def getNin(clientID):
 
 
 def getRegistrationNo(clientID):
-    url = "http://10.255.201.148:92/api/v1/ClientIdentity/GetClient"
+    url = get_reg_url
     payload = json.dumps({
         "clientID": clientID,
         "direction": 0
@@ -94,12 +94,12 @@ def getRegistrationNo(clientID):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-    print(res)
+    #print(res)
     return res["clientQuery"][0]["registratedAt"]
 
 
 def getFcs(clientID):
-    url = "http://10.255.201.148:92/api/v1/UserDefinableFields/GetUserFieldsData"
+    url = getFcs_url
 
     payload = json.dumps({
         "ModuleID": "1090",
@@ -177,7 +177,7 @@ def addCap(request):
             application_duration = form['application_duration'].value()
             product_type_code = form['product_type_code'].value()
             application_type_code = form['application_type_code'].value()
-            generate_report = form['generate_report'].value()
+
             identity_id_number = form['identity_id_number'].value()
             identity_type_code = form['identity_type_code'].value()
 
@@ -196,8 +196,7 @@ def addCap(request):
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": product_type_code,
-                "application_type_code": application_type_code,
-                "generate_report": generate_report
+                "application_type_code": application_type_code
             }, indent=4)
             response = requests.request("POST", url, headers=headers, data=payload)
             # print(response.text)
@@ -472,7 +471,7 @@ def addNimble__(request):
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
-    url_cap = "https://sandbox.analytics.metropol.co.ug/api/v3/cap"
+    url_cap = url_caps
     headers_cap = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -526,7 +525,7 @@ def addNimble__(request):
             from datetime import datetime
             data = {
 
-                "partner_bou_code": "UG001",
+                "partner_bou_code": "CB026",
                 "partner_branch_code": "001",
                 # "application_date": datetime.now().date(),
                 "application_date": application_date,
@@ -538,8 +537,7 @@ def addNimble__(request):
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": "7",
-                "application_type_code": "I",
-                "generate_report": "true"
+                "application_type_code": "I"
             }
             obj = Cap.objects.create(**data)
             obj.save()
@@ -551,7 +549,7 @@ def addNimble__(request):
 def getPendingCRB():
     cursor = conn.cursor()
     status = 'PENDING'
-    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_CRBEnquiry(nolock) where MetropolStatus = ? ',
+    cursor.execute(f'select  top 1 OurBranchID,ApplicationID from t_MetropolCRB(nolock) where MetropolStatus = ? ',
                    status)
     for row in cursor:
         application_dic = {
@@ -562,11 +560,10 @@ def getPendingCRB():
         return application_dic
 
 
-def updateApplicationID(application_id):
+def updateApplicationID(application_id, request,response):
     cursor = conn.cursor()
-    cursor.execute('update t_CRBEnquiry set MetropolStatus = ? where  ApplicationID = ? ', 'SUCCESS', application_id)
+    cursor.execute('update t_MetropolCRB set MetropolStatus = ? where  ApplicationID = ? ', 'SUCCESS', application_id)
     conn.commit()
-
 
 res_dic = getPendingCRB()
 OurBranchID = res_dic['OurBranchID']
@@ -596,7 +593,7 @@ def getIdentity_id_number_required(nin, fcs, tin, passport, clientTypeID, countr
 
 
 def addNimble(request):
-    url = "http://10.255.201.148:92/api/v1/LoanApplication/GetLoanApplication"
+    url = add_nimble_url
 
     headers = {
         'Content-Type': 'application/json',
@@ -613,7 +610,7 @@ def addNimble(request):
         if form.is_valid():
             OurBranchID = form['OurBranchID'].value()
             ApplicationID = form['ApplicationID'].value()
-            # ApiOperatorID = form['ApiOperatorID'].value()
+
 
             payload = json.dumps({
                 "OurBranchID": OurBranchID,
@@ -651,72 +648,64 @@ def addNimble(request):
             application_amount = res["LoanApplication"][0]["LoanAmount"]
             application_duration = res["LoanApplication"][0]["LoanTerm"]
 
-            borrower_list = [{"identity_id_number": identity_id_number_required,
-                              "identity_type_code": Identity_Type_Codes,
-                              "country_code": "UG"}]
+            borrower_list = [{"identity_number": identity_id_number_required,
+                              "identity_type": Identity_Type_Codes}]
 
             payload_cap = json.dumps({
-                "partner_bou_code": "UG001",
+                "partner_bou_code": "CB026",
                 "partner_branch_code": "001",
                 "application_date": application_date,
-                "partner_reference": partner_reference,
+                "application_reference": partner_reference,
+                "customer_phone_number": phone,
                 "borrowers": borrower_list,
-                "phone": phone,
                 "currency_code": currency_code,
                 "application_amount": application_amount,
                 "application_duration": application_duration,
                 "product_type_code": "7",
-                "application_type_code": "I",
-                "generate_report": "true"
+                "application_type_code": "I"
             }, indent=4)
 
             response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
-
             result = response.json()
-
             res_message = result['api_code_description']
-            print(res_message)
+            if result['has_error'] :
+                messages.success(request, f'{res_message}')
+            else:
+                data = {
+                    "partner_bou_code": "CB026",
+                    "partner_branch_code": "001",
+                    "application_date": application_date,
+                    "application_reference": partner_reference,
+                    "identity_id_number": identity_id_number_required,
+                    "identity_type_code": Identity_Type_Codes,
+                    "phone": phone,
+                    "currency_code": currency_code,
+                    "application_amount": application_amount,
+                    "application_duration": application_duration,
+                    "product_type_code": "7",
+                    "application_type_code": "I",
+                    "report_file_path": f'{file_path}{identity_id_number}.pdf'
+                }
 
-            print('identity_id_number_required', identity_id_number_required)
-            print('Identity_Type_Codes', Identity_Type_Codes)
-
-            data = {
-
-                "partner_bou_code": "UG001",
-                "partner_branch_code": "001",
-                "application_date": application_date,
-                "partner_reference": partner_reference,
-                "identity_id_number": identity_id_number_required,
-                "identity_type_code": Identity_Type_Codes,
-                "phone": phone,
-                "currency_code": currency_code,
-                "application_amount": application_amount,
-                "application_duration": application_duration,
-                "product_type_code": "7",
-                "application_type_code": "I",
-                "generate_report": "true",
-                "report_file_path": f'{file_path}{identity_id_number}.pdf'
-            }
-
-            generateReportAuto(identity_id_number_required)
-            obj = Cap.objects.create(**data)
-            obj.save()
-            updateApplicationID(partner_reference)
-            messages.success(request, f'{res_message}')
-            return HttpResponseRedirect('/Metropol/getCap')
+                generateReportAuto(identity_id_number_required)
+                obj = Cap.objects.create(**data)
+                obj.save()
+                updateApplicationID(partner_reference,payload_cap,result)
+                messages.success(request, f'{res_message}')
+                return HttpResponseRedirect('/Metropol/getCap')
 
     return render(request, 'metropol/core_applications.html', {'form': form})
 
 
 def addNimbleAuto():
-    url = "http://10.255.201.148:92/api/v1/LoanApplication/GetLoanApplication"
+    url = add_nimble_url
 
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getAccessToken()}'
     }
 
-    url_cap = "https://sandbox.analytics.metropol.co.ug/api/v3/cap"
+    url_cap = url_caps
     headers_cap = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {getBearerToken()}'
@@ -732,7 +721,7 @@ def addNimbleAuto():
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
 
-    print(res)
+    #print(res)
 
     ClientID = res["LoanApplication"][0]["ClientID"]
 
@@ -775,41 +764,39 @@ def addNimbleAuto():
         "application_amount": application_amount,
         "application_duration": application_duration,
         "product_type_code": "7",
-        "application_type_code": "B"
+        "application_type_code": "I"
     }, indent=4)
 
     response = requests.request("POST", url_cap, headers=headers_cap, data=payload_cap)
 
     result = response.json()
-
+    print(result)
+    print(borrower_list)
     res_message = result['api_code_description']
-    print(res_message)
+    if result['has_error']:
+        print(res_message)
+    else:
+        data = {
 
-    print('identity_id_number_required', identity_id_number_required)
-    print('Identity_Type_Codes', Identity_Type_Codes)
+            "partner_bou_code": "CB026",
+            "partner_branch_code": "001",
+            "application_date": application_date,
+            "application_reference": partner_reference,
+            "identity_id_number": identity_id_number_required,
+            "identity_type_code": Identity_Type_Codes,
+            "phone": phone,
+            "currency_code": currency_code,
+            "application_amount": application_amount,
+            "application_duration": application_duration,
+            "product_type_code": "7",
+            "application_type_code": "I",
+            "report_file_path": f'{file_path}{identity_id_number_required}.pdf'
+        }
 
-    data = {
-
-        "partner_bou_code": "UG001",
-        "partner_branch_code": "001",
-        "application_date": application_date,
-        "partner_reference": partner_reference,
-        "identity_id_number": identity_id_number_required,
-        "identity_type_code": Identity_Type_Codes,
-        "phone": phone,
-        "currency_code": currency_code,
-        "application_amount": application_amount,
-        "application_duration": application_duration,
-        "product_type_code": "7",
-        "application_type_code": "I",
-        "generate_report": "true",
-        "report_file_path": f'{file_path}{identity_id_number_required}.pdf'
-    }
-
-    generateReportAuto(identity_id_number_required)
-    obj = Cap.objects.create(**data)
-    obj.save()
-    updateApplicationID(partner_reference)
+        generateReportAuto(identity_id_number_required)
+        obj = Cap.objects.create(**data)
+        obj.save()
+        updateApplicationID(partner_reference,payload_cap,result)
 
 
 def generateReportAuto(identity_id_number):
@@ -835,12 +822,12 @@ def generateReportAuto(identity_id_number):
         ],
         "institution_code": "CB026"
     }, indent=4)
-    print('identity_id_number', identity_id_number)
-    print('identity_id_number', identity_type_id)
+    #print('identity_id_number', identity_id_number)
+    #print('identity_id_number', identity_type_id)
     response = requests.request("POST", url, headers=headers, data=payload)
     res = response.json()
-    print(f'This is a response Allan {res}')
-    print(f'Payload : {payload}')
+    #print(f'This is a response Allan {res}')
+    #print(f'Payload : {payload}')
     if res['has_error']:
         print(res['api_code_description'])
     else:

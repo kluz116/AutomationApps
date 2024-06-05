@@ -30,15 +30,14 @@ class CapForm(forms.ModelForm):
                                                      'data-live-search': 'true', 'data-style': 'btn-white'}),
             'application_type_code': forms.Select(attrs={'class': 'form-control selectpicker', 'data-size': '5',
                                                          'data-live-search': 'true', 'data-style': 'btn-white'}),
-            'generate_report': forms.TextInput(
-                attrs={'class': 'form-control', 'placeholder': 'generate_report'}),
+
         }
 
 
 class UpdateCapForm(forms.ModelForm):
     class Meta:
         model = Cap
-        fields = ['partner_reference', 'application_status', 'amount_approved', 'partner_bou_code',
+        fields = ['application_reference', 'application_status', 'amount_approved', 'partner_bou_code',
                   'application_status_code', 'application_status_date', 'approved_duration',
                   'application_rejection_reason', 'application_rejection_reason_code', ]
 

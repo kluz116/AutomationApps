@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from AutomationApps.api import api
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('LegalDoc/', include('LegalDoc.urls')),
@@ -13,7 +14,12 @@ urlpatterns = [
     path('Crm/', include('Crm.urls')),
     path('Metropol/', include('Metropol.urls')),
     path('innovations/', include('innovations.urls')),
-    path("api/", api.urls),  # <---------- !
+    path("ecw/", include('ecw.urls')),
+    path("api/", api.urls),
+    path('api-auth/', include('rest_framework.urls')),
+    path('ecwapi/', include('ecwapi.urls')),
+    path('EcwPayments/', include('EcwPayments.urls')),
+
 
 ]
 if settings.DEBUG:
