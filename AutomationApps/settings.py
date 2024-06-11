@@ -60,9 +60,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ecwapi',
     'EcwPayments',
-
-]
-
+    'ecw',]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -172,8 +170,17 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
 "http://localhost:3000",
 "https://api.domain.com",
-"http://127.0.0.1:8000"
+"http://127.0.0.1:8000",
+"https://10.255.201.179:8076"
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+"http://localhost:3000",
+"https://api.domain.com",
+"http://127.0.0.1:8000",
+"https://10.255.201.179:8076"
+]
+
 
 
 # settings.py
