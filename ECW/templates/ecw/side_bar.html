@@ -42,11 +42,23 @@
         <a href="javascript:;">
           <b class="caret"></b>
           <i class="fa fa-list"></i>
+          <span>AccountHolder</span>
+        </a>
+        <ul class="sub-menu">
+          <li class="active"><a href="{% url 'getAccountHolders' %}">AccountHolders</a></li>
+          <li><a href="{% url 'addAccountHolder' %}">Search AccountHolder</a></li>
+        </ul>
+      </li>
+      <li class="has-sub active">
+        <a href="javascript:;">
+          <b class="caret"></b>
+          <i class="fa fa-th-large"></i>
           <span>Deposits</span>
         </a>
         <ul class="sub-menu">
-          <li class="active"><a href="{% url 'getIndex' %}">Deposit Listing</a></li>
-          <li><a href="{% url 'getIndex' %}">Create Deposits</a></li>
+          <li class="active"><a href="{% url 'getDeposits' %}">Deposit</a></li>
+          <li ><a href="{% url 'addDeposit' %}">Add Deposit</a></li>
+
         </ul>
       </li>
        <li class="has-sub active">
@@ -61,6 +73,7 @@
         </ul>
       </li>
 
+
       <li class="has-sub">
         <a href="javascript:;">
           <b class="caret"></b>
@@ -74,16 +87,7 @@
         </ul>
       </li>
 
-      <li class="has-sub active">
-        <a href="javascript:;">
-          <b class="caret"></b>
-          <i class="fa fa-th-large"></i>
-          <span>Configurations</span>
-        </a>
-        <ul class="sub-menu">
-          <li class="active"><a href="{% url 'getBranches' %}">Branches</a></li>
-        </ul>
-      </li>
+
 
       <!-- begin sidebar minify button -->
       <li>
