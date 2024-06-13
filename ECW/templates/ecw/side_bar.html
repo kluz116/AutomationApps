@@ -57,7 +57,9 @@
         </a>
         <ul class="sub-menu">
           <li class="active"><a href="{% url 'getDeposits' %}">Deposit</a></li>
-          <li ><a href="{% url 'addDeposit' %}">Add Deposit</a></li>
+          <li ><a href="{% url 'addDeposit' %}">Add Deposit Phone Number</a></li>
+          <li ><a href="{% url 'addDepositExternalId' %}">Add Deposit External</a></li>
+
 
         </ul>
       </li>
@@ -68,7 +70,7 @@
           <span>Withdraws</span>
         </a>
         <ul class="sub-menu">
-          <li class="active"><a href="{% url 'getIndex' %}">Withdraw Listing</a></li>
+          <li class="active"><a href="{% url 'getPaymentInstructions' %}">Payment Instructions</a></li>
           <li><a href="{% url 'getIndex' %}">Create Withdraw</a></li>
         </ul>
       </li>

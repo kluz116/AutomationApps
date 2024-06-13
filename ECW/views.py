@@ -6,9 +6,27 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from .EcwForms import *
-from .api_calls import *
 
-# Create your views here.
+from .api_calls import *
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.views import APIView
+
+from .serializers import PaymentInstructionRequestSerializer
+from .decorators import validate_signature
+
+
+PUBLIC_KEY_PEM = """-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm9PLCmsiOn/IqzDAcILS
+ENe0ftsFbncpI4t7UMwtNFHAzZQFMpkyGeKB+UBBWED+vt2JknG86JCl4DkB2yab
+sdgQLT3L9En1/OvqcWV7VNrENzhyGDx86Hc0XXSyPnURA4L4qzCUmgATDdwj4Ggi
+U0BOQstLQ0fVajB70p13h3orqkrGzLjfCHGIRwDtYo29gunpCcuygTxuJUm+oUlR
+YmqZQleg8pb/7eqYUzM7rpS3ul40GepTKlp3A9H8yn2NCHSSXQ5wOBxUWem4bKn9
+eRz/u+bj+phX435VcpSkprXeOWgorBFoKKclvHYUgTfnf99EX6dGa5Y7Hjg2NdSy
+MwIDAQAB
+-----END PUBLIC KEY-----
+"""
 
 # Create your views here.
 def login_request(request):
@@ -85,6 +103,46 @@ def addDeposit(request):
             print(form.errors)
     return render(request, 'ecw/create_deposit.html', {'form': form})
 
+def addDepositExternalId(request):
+    form = DepositFormExternal(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            bankcode = form['bankcode'].value()
+            accountnumber = form['accountnumber'].value()
+            amount = form['amount'].value()
+            receiver = form['receiver'].value()
+            transactiontimestamp = form['transactiontimestamp'].value()
+            currency = form['currency'].value()
+            #banktransactionid = form['banktransactionid'].value()
+            message = form['message'].value()
+
+            banktransactionid = generate_random_trx_id()
+
+            res = depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, currency, receiver,
+                               banktransactionid, message)
+
+
+            status =  res["status"]
+
+            deposit_obj_data = {
+                "bankcode": bankcode,
+                "accountnumber": accountnumber,
+                "amount": amount,
+                "receiver": receiver,
+                "transactiontimestamp": transactiontimestamp,
+                "currency": currency,
+                "banktransactionid": banktransactionid,
+                "message": message,
+                "status": status }
+
+            obj = DepositFunds.objects.create(**deposit_obj_data)
+            obj.save()
+            messages.success(request, f'Successful deposit of {amount} UGX to {receiver} with status :{status}')
+            return HttpResponseRedirect('/ecw/getDeposits')
+        else:
+            print(form.errors)
+    return render(request, 'ecw/create_deposit_external.html', {'form': form})
+
 
 def getDeposits(request):
     dep = DepositFunds.objects.all().order_by('-id')
@@ -113,15 +171,31 @@ def addAccountHolder(request):
                 "msisdn": msisdn,
                 "accountholderstatus": accountholderstatus,
                 "profilename": profilename}
+            if msisdn == 'None':
+                messages.success(request, f'{msg}')
+            else:
+                obj = AccountHolder.objects.create(**account_holder_obj_data)
+                obj.save()
 
-            obj = AccountHolder.objects.create(**account_holder_obj_data)
-            obj.save()
-            #form.save()
-            messages.success(request, f'{msg}')
-            return HttpResponseRedirect('/ecw/getAccountHolders')
+                return HttpResponseRedirect('/ecw/getAccountHolders')
+
     return render(request, 'ecw/add_account_holder.html', {'form': form})
 
 def getAccountHolders(request):
     dep = AccountHolder.objects.all().order_by('-id')
     return render(request, 'ecw/account_holders.html', {'dep': dep})
+
+@api_view(['POST'])
+#@validate_signature(PUBLIC_KEY_PEM)
+def paymentInstruction(request):
+    serializer = PaymentInstructionRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def getPaymentInstructions(request):
+    dep = PaymentInstructionRequest.objects.all().order_by('-id')
+    return render(request, 'ecw/paymentinstructions.html', {'dep': dep})
 

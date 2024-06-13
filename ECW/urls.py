@@ -1,5 +1,7 @@
 from django.urls import path
-import ecw.views as views
+#import ecw.views as views
+from . import views
+
 
 
 urlpatterns = [
@@ -10,5 +12,10 @@ urlpatterns = [
     path('addAccountHolder', views.addAccountHolder, name='addAccountHolder'),
     path('getDeposits',views.getDeposits,name='getDeposits'),
     path('getAccountHolders',views.getAccountHolders,name='getAccountHolders'),
+    path('addDepositExternalId', views.addDepositExternalId, name='addDepositExternalId'),
+    path('paymentinstruction', views.paymentInstruction, name='paymentInstruction'),
+    path('getPaymentInstructions', views.getPaymentInstructions, name='getPaymentInstructions'),
+
+
 
 ]

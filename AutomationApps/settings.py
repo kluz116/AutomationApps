@@ -97,10 +97,12 @@ WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
-        'rest_framework_xml.parsers.XMLParser',
+        #'rest_framework_xml.parsers.XMLParser',
+        'ecw.parsers.CustomXMLParser',
     ),
     'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_xml.renderers.XMLRenderer',
+        #'rest_framework_xml.renderers.XMLRenderer',
+        'ecw.renderers.CustomXMLRenderer',
     ),
 }
 
