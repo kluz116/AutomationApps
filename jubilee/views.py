@@ -1,10 +1,13 @@
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .api_calls import debitCustomer, creditCustomer,AddTransferTransaction,AccountLookup
-from .models import Transaction
-from .serializers import TransactionSerializer,AddTransactionSerializer,CustomerSerializer
+from .api_calls import debitCustomer, creditCustomer, AddTransferTransaction, AccountLookup, getCustomer
+from .forms import AccountFormForm
+from .models import Transaction, Accounts
+from .serializers import TransactionSerializer, AddTransactionSerializer, CustomerSerializer
 
 
 def getTransactions(request):
@@ -49,3 +52,18 @@ def GetAccountCustomer(request):
         return Response(transaction)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+def addCustomerNimble(request):
+    form = AccountFormForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            bank_account = form['account_id'].value()
+
+            clientDetails = getCustomer(bank_account)
+            obj = Accounts.objects.create(**clientDetails)
+            obj.save()
+
+            messages.success(request, f'Successfully created customer')
+            return HttpResponseRedirect('/LegalDoc/getCustomers')
+
+    return render(request, 'addCustomer.html', {'form': form})

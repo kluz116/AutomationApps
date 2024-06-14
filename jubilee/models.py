@@ -2,6 +2,8 @@ from django.db import models
 
 # Create your models here.
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class Transaction(models.Model):
@@ -40,3 +42,11 @@ class Transaction(models.Model):
     trx_flag_id = models.CharField(max_length=10, blank=True, null=True)
     trx_type_id = models.CharField(max_length=10)
     value_date = models.DateTimeField()
+
+
+class Accounts(models.Model):
+    account_id = models.CharField(max_length=20)
+    ourbranch_id = models.CharField(max_length=10)
+    accountname =  models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='yourmodel_created_by')

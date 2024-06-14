@@ -173,3 +173,26 @@ def AccountLookup(payload_obj):
     response = requests.request("POST", url, headers=headers, data=payload)
 
     return response.json()
+
+def getCustomer(bank_account):
+    url = "http://10.255.201.179:8092/api/v1/AccountMaintenance/GetAccountCustomer"
+
+    payload = json.dumps({
+        "AccountID": bank_account
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getAccessToken()}'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    res = response.json()
+
+    account_id = res["ClientDetails"][0]["AccountID"]
+    ourbranch_id = res["ClientDetails"][0]["OurBranchID"]
+    accountname = res["ClientDetails"][0]["ClientName"]
+
+    return {"account_id":account_id,"ourbranch_id":ourbranch_id,"accountname":accountname}
+
+
