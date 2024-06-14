@@ -19,8 +19,7 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
     path('ecwapi/', include('ecwapi.urls')),
     path('EcwPayments/', include('EcwPayments.urls')),
-
-
+    path('jubilee/', include('jubilee.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

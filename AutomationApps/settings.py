@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'ecwapi',
     'EcwPayments',
-    'ecw',]
+    'ecw',
+    'jubilee',]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -95,16 +96,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 
-REST_FRAMEWORK = {
-    'DEFAULT_PARSER_CLASSES': (
+#REST_FRAMEWORK = {
+    #'DEFAULT_PARSER_CLASSES': (
         #'rest_framework_xml.parsers.XMLParser',
-        'ecw.parsers.CustomXMLParser',
-    ),
-    'DEFAULT_RENDERER_CLASSES': (
+        #'ecw.parsers.CustomXMLParser',
+        #'rest_framework.renderers.JSONRenderer',
+    #),
+    #'DEFAULT_RENDERER_CLASSES': (
         #'rest_framework_xml.renderers.XMLRenderer',
-        'ecw.renderers.CustomXMLRenderer',
-    ),
-}
+        #'ecw.renderers.CustomXMLRenderer',
+        #'rest_framework.parsers.JSONParser',
+    #),
+#}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
