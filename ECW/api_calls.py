@@ -1,8 +1,45 @@
+from datetime import datetime
+
 import requests
-import time
 from ecw.encrypt import *
 import xmltodict
 import json
+
+
+
+def closeAllSession():
+    url = "http://10.255.201.179:8092/api/v1/Common/CloseAllSessions"
+
+    payload = json.dumps({
+        "ourBranchID": "206",
+        "operatorID": "CM2056"
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+
+    print(res)
+
+
+def getAccessToken():
+    closeAllSession()
+    url = "http://10.255.201.179:8093/api/v1/Token/LoginUser"
+
+    payload = json.dumps({
+        "userID": "CM2056",
+        "password": "New@12345",
+        "branchID": "206",
+        "systemID": "eee"
+    })
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    res = response.json()
+    return res["accessToken"]
 
 
 def getsigningcertificate():
@@ -62,11 +99,12 @@ def getAccontHolderInfo(phone_nmber):
     surname = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["surname"]
     msisdn = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["msisdn"]
     accountholderstatus = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"][
-            "accountholderstatus"]
+        "accountholderstatus"]
     profilename = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["profilename"]
 
     return {"firstname": firstname, "surname": surname, "msisdn": msisdn,
-                "accountholderstatus": accountholderstatus, "profilename": profilename,"msg":f"Successful found {msisdn}"}
+            "accountholderstatus": accountholderstatus, "profilename": profilename, "msg": f"Successful found {msisdn}"}
+
 
 def getAccontHolderInfoDeposits(phone_nmber):
     random_challenge = generate_random_challenge()
@@ -97,18 +135,20 @@ def getAccontHolderInfoDeposits(phone_nmber):
     firstname = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["firstname"]
     surname = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["surname"]
     msisdn = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["msisdn"]
-    accountholderstatus = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"]["accountholderstatus"]
+    accountholderstatus = obj_response["ns5:getaccountholderinforesponse"]["accountholderbasicinfo"][
+        "accountholderstatus"]
 
-    return {"firstname":firstname,
-            "surname":surname,
-            "msisdn":msisdn,
-            "accountholderstatus":accountholderstatus}
+    return {"firstname": firstname,
+            "surname": surname,
+            "msisdn": msisdn,
+            "accountholderstatus": accountholderstatus}
 
 
-def depositFunds(bankcode, accountnumber, amount, transactiontimestamp, currency, phone_number, banktransactionid, message):
+def depositFunds(bankcode, accountnumber, amount, transactiontimestamp, currency, phone_number, banktransactionid,
+                 message):
     receiver = f'FRI:{phone_number}/MSISDN'
     obj_response = getAccontHolderInfoDeposits(phone_number)
-    receiverfirstname =obj_response["firstname"]
+    receiverfirstname = obj_response["firstname"]
     receiversurname = obj_response["surname"]
 
     random_challenge = generate_random_challenge()
@@ -142,11 +182,12 @@ def depositFunds(bankcode, accountnumber, amount, transactiontimestamp, currency
 
     return {"receiverfirstname": receiverfirstname,
             "receiversurname": receiversurname,
-             "status": status,
-            "financialtransactionid":financialtransactionid}
+            "status": status,
+            "financialtransactionid": financialtransactionid}
 
 
-def depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, currency, phone_number, banktransactionid, message):
+def depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, currency, phone_number,
+                         banktransactionid, message):
     receiver = f'FRI:{phone_number}/ext'
 
     random_challenge = generate_random_challenge()
@@ -171,6 +212,8 @@ def depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, 
         'Authorization': 'Basic RlRCYmFuazpBQmMxMjM0NTYh'
     }
 
+    print(payload)
+
     response = requests.request("POST", url, headers=headers, data=payload, cert=(cert_path, key_path), verify=False)
     print(response.text)
     results = json.dumps(xmltodict.parse(response.text, process_namespaces=False), indent=4)
@@ -179,9 +222,91 @@ def depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, 
     financialtransactionid = deposit_response["ns4:depositresponse"]["financialtransactionid"]
 
     return {
-             "status": status,
-            "financialtransactionid":financialtransactionid}
+        "status": status,
+        "financialtransactionid": financialtransactionid}
 
 
+def nimbleCreditCustomer(AccountID,Amount,trx_description):
 
+    url = "http://10.255.201.179:8092/api/v1/CashTransaction/AddCashTransaction"
 
+    payload = json.dumps({
+        "TrxBranchID": "206",
+        "TrxBatchID": None,
+        "SerialID": None,
+        "OurBranchID": "206",
+        "AccountTypeID": "C",
+        "AccountID": AccountID,
+        "ProductID": "803",
+        "ModuleID": "3000",
+        "TrxTypeID": "CC",
+        "TrxDate": "2024-05-04 00:00:00",#datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "Amount": Amount,
+        "LocalAmount": Amount,
+        "TrxCurrencyID": "UGX",
+        "TrxAmount": Amount,
+        "ExchangeRate": "1.0000",
+        "MeanRate": "1.0000",
+        "Profit": "0",
+        "InstrumentTypeID": "V",
+        "ChequeID": "0",
+        "ChequeDate": None,
+        "ReferenceNo": "",
+        "Remarks": trx_description,
+        "TrxDescriptionID": "001",
+        "TrxDescription": trx_description,
+        "MainGLID": 1,
+        "ContraGLID": "100005",
+        "TrxFlagID": "",
+        "ImageID": "0",
+        "TrxPrinted": "0",
+        "CreatedBy": "CM2056",
+        "UpdateCount": "2",
+        "BREFTChargeID": None,
+        "BREFTTrxID": None,
+        "ReversalID": "0",
+        "SupervisedBy": None,
+        "SupervisedOn": None,
+        "ChargeOnExcessAmount": "0",
+        "IsChargeWaived": "false",
+        "TrxCodeID": "0",
+        "ValueDate": "2024-05-04 00:00:00",#datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "ForwardRemark": "",
+        "ErrorNo": "",
+        "MainRowID": 0,
+        "BranchType": "",
+        "ActionID": None,
+        "OtherDetails": "",
+        "ActionTypeID": "I",
+        "TillID": "3",
+        "AccountTagID": None,
+        "Denominations": None,
+        "CostCenterID": "99",
+        "ContraTillID": 0,
+        "DeletedBy": None,
+        "DeletedOn": None,
+        "DeletedReason": None,
+        "ApiActionTypeID": 2,
+        "ApiActionID": 0,
+        "ApiDynamicFields": None,
+        "ApiModuleID": 3000,
+        "ApiOperatorID": "CM2056",
+        "ApiOurBranchID": "206",
+        "ApiRequestID": None,
+        "ApiRoleID": "SBO",
+        "ApiUniqueID": "15348267561754039961",
+        "ApiOperatedOn": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "ApiBankID": None,
+        "ApiSearchKey": None,
+        "RecentActivityModuleID": None,
+        "RecentActivityControls": None,
+        "RecentActivityControlValues": None
+    })
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {getAccessToken()}'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    return response.json()

@@ -4,6 +4,8 @@ import xml.etree.ElementTree as ET
 
 
 class CustomXMLParser(XMLParser):
+    media_type = 'text/xml'
+
     def parse(self, stream, media_type=None, parser_context=None):
         # Parse the XML and get rid of <root> and <list-item> tags
         parsed_data = super().parse(stream, media_type, parser_context)

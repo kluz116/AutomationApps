@@ -6,8 +6,7 @@ class DepositForm(forms.ModelForm):
     class Meta:
         model = DepositFunds
         fields = "__all__"
-        exclude = ( 'receiversurname', 'receiverfirstname','status','banktransactionid')
-
+        exclude = ('receiversurname', 'receiverfirstname', 'status', 'banktransactionid', 'trx_batchid', 'trx_serialid')
         widgets = {
             'bankcode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bank Code'}),
             'accountnumber': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Account Number'}),
@@ -24,7 +23,7 @@ class DepositFormExternal(forms.ModelForm):
     class Meta:
         model = DepositFunds
         fields = "__all__"
-        exclude = ( 'receiversurname', 'receiverfirstname','status','banktransactionid')
+        exclude = ( 'receiversurname', 'receiverfirstname','status','banktransactionid','trx_batchid','trx_serialid')
 
         widgets = {
             'bankcode': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Bank Code'}),

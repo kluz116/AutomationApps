@@ -6,6 +6,7 @@ from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
 import base64
 
+
 def validate_signature(public_key_pem):
     def decorator(view_func):
         @wraps(view_func)
@@ -35,5 +36,7 @@ def validate_signature(public_key_pem):
                 return JsonResponse({'error': 'Invalid signature'}, status=403)
 
             return view_func(request, *args, **kwargs)
+
         return _wrapped_view
+
     return decorator

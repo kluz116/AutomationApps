@@ -96,18 +96,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'AutomationApps.wsgi.application'
 
-#REST_FRAMEWORK = {
-    #'DEFAULT_PARSER_CLASSES': (
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
         #'rest_framework_xml.parsers.XMLParser',
-        #'ecw.parsers.CustomXMLParser',
-        #'rest_framework.renderers.JSONRenderer',
-    #),
-    #'DEFAULT_RENDERER_CLASSES': (
+        'ecw.parsers.CustomXMLParser',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
         #'rest_framework_xml.renderers.XMLRenderer',
-        #'ecw.renderers.CustomXMLRenderer',
-        #'rest_framework.parsers.JSONParser',
-    #),
-#}
+        'ecw.renderers.CustomXMLRenderer',
+    ),
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

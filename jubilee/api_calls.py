@@ -85,7 +85,7 @@ def debitCustomer(payload_obj):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    print(response.json())
+    return response.json()
 
 
 def creditCustomer(payload_obj):
@@ -136,7 +136,7 @@ def creditCustomer(payload_obj):
     }
 
     response = requests.request("POST", url, headers=headers, data=payload)
-    print(response.json())
+    return response.json()
 
 
 def AddTransferTransaction(payload_obj):

@@ -8,14 +8,14 @@ from django.contrib.auth.decorators import login_required
 from .EcwForms import *
 
 from .api_calls import *
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes, renderer_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
 from .serializers import PaymentInstructionRequestSerializer
 from .decorators import validate_signature
-
+from .utility import getMessage, getbatchID, getSerialID
 
 PUBLIC_KEY_PEM = """-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAm9PLCmsiOn/IqzDAcILS
@@ -27,6 +27,7 @@ eRz/u+bj+phX435VcpSkprXeOWgorBFoKKclvHYUgTfnf99EX6dGa5Y7Hjg2NdSy
 MwIDAQAB
 -----END PUBLIC KEY-----
 """
+
 
 # Create your views here.
 def login_request(request):
@@ -72,36 +73,44 @@ def addDeposit(request):
             currency = form['currency'].value()
             #banktransactionid = form['banktransactionid'].value()
             message = form['message'].value()
-
             banktransactionid = generate_random_trx_id()
+            trx_description = f'MTN Deposit Cash Deposit {amount} MSSIDN: {receiver} at {transactiontimestamp}'
 
-            res = depositFunds(bankcode, accountnumber, amount, transactiontimestamp, currency, receiver,
-                               banktransactionid, message)
+            response = nimbleCreditCustomer("206803000001", amount,trx_description)
 
-            first_name = res["receiverfirstname"]
-            sur_name = res["receiversurname"]
-            status =  res["status"]
+            if getMessage(response) == 'Success':
+                res = depositFunds(bankcode, accountnumber, amount, transactiontimestamp, currency, receiver,
+                                   banktransactionid, message)
 
-            deposit_obj_data = {
-                "bankcode": bankcode,
-                "accountnumber": accountnumber,
-                "amount": amount,
-                "receiver": receiver,
-                "transactiontimestamp": transactiontimestamp,
-                "currency": currency,
-                "banktransactionid": banktransactionid,
-                "message": message,
-                "receiverfirstname": first_name,
-                "receiversurname": sur_name,
-                "status": status }
+                first_name = res["receiverfirstname"]
+                sur_name = res["receiversurname"]
+                status = res["status"]
 
-            obj = DepositFunds.objects.create(**deposit_obj_data)
-            obj.save()
-            messages.success(request, f'Successful deposit of {amount} UGX to {receiver} with status :{status}')
-            return HttpResponseRedirect('/ecw/getDeposits')
-        else:
-            print(form.errors)
+                trx_batchid = getbatchID(response)
+                trx_serialid = getSerialID(response)
+
+                deposit_obj_data = {
+                    "bankcode": bankcode,
+                    "accountnumber": accountnumber,
+                    "amount": amount,
+                    "receiver": receiver,
+                    "transactiontimestamp": transactiontimestamp,
+                    "currency": currency,
+                    "banktransactionid": banktransactionid,
+                    "message": message,
+                    "receiverfirstname": first_name,
+                    "receiversurname": sur_name,
+                    "status": status,
+                    "trx_batchid": trx_batchid,
+                    "trx_serialid": trx_serialid}
+
+                obj = DepositFunds.objects.create(**deposit_obj_data)
+                obj.save()
+                messages.success(request, f'Successful deposit of {amount} UGX to {receiver} with status :{status}. TrxBatchID {trx_batchid} and SerailID {trx_serialid}')
+                return HttpResponseRedirect('/ecw/getDeposits')
+
     return render(request, 'ecw/create_deposit.html', {'form': form})
+
 
 def addDepositExternalId(request):
     form = DepositFormExternal(request.POST or None)
@@ -117,30 +126,36 @@ def addDepositExternalId(request):
             message = form['message'].value()
 
             banktransactionid = generate_random_trx_id()
+            trx_description = f'MTN Deposit Cash Deposit {amount} MSSIDN: {receiver} at {transactiontimestamp}'
 
-            res = depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, currency, receiver,
-                               banktransactionid, message)
+            response = nimbleCreditCustomer("206803000001", amount, trx_description)
 
+            if getMessage(response) == 'Success':
+                res = depositFundsExternal(bankcode, accountnumber, amount, transactiontimestamp, currency, receiver,
+                                           banktransactionid, message)
 
-            status =  res["status"]
+                status = res["status"]
+                trx_batchid = getbatchID(response)
+                trx_serialid = getSerialID(response)
 
-            deposit_obj_data = {
-                "bankcode": bankcode,
-                "accountnumber": accountnumber,
-                "amount": amount,
-                "receiver": receiver,
-                "transactiontimestamp": transactiontimestamp,
-                "currency": currency,
-                "banktransactionid": banktransactionid,
-                "message": message,
-                "status": status }
+                deposit_obj_data = {
+                    "bankcode": bankcode,
+                    "accountnumber": accountnumber,
+                    "amount": amount,
+                    "receiver": receiver,
+                    "transactiontimestamp": transactiontimestamp,
+                    "currency": currency,
+                    "banktransactionid": banktransactionid,
+                    "message": message,
+                    "status": status,
+                    "trx_batchid": trx_batchid,
+                    "trx_serialid": trx_serialid
+                }
 
-            obj = DepositFunds.objects.create(**deposit_obj_data)
-            obj.save()
-            messages.success(request, f'Successful deposit of {amount} UGX to {receiver} with status :{status}')
-            return HttpResponseRedirect('/ecw/getDeposits')
-        else:
-            print(form.errors)
+                obj = DepositFunds.objects.create(**deposit_obj_data)
+                obj.save()
+                messages.success(request, f'Successful deposit of {amount} UGX to {receiver} with status :{status}. TrxBatchID {trx_batchid} and SerailID {trx_serialid}')
+                return HttpResponseRedirect('/ecw/getDeposits')
     return render(request, 'ecw/create_deposit_external.html', {'form': form})
 
 
@@ -181,21 +196,24 @@ def addAccountHolder(request):
 
     return render(request, 'ecw/add_account_holder.html', {'form': form})
 
+
 def getAccountHolders(request):
     dep = AccountHolder.objects.all().order_by('-id')
     return render(request, 'ecw/account_holders.html', {'dep': dep})
 
+
 @api_view(['POST'])
 #@validate_signature(PUBLIC_KEY_PEM)
 def paymentInstruction(request):
+    print(request.data)
     serializer = PaymentInstructionRequestSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, content_type="text/xml")
+    print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def getPaymentInstructions(request):
     dep = PaymentInstructionRequest.objects.all().order_by('-id')
     return render(request, 'ecw/paymentinstructions.html', {'dep': dep})
-

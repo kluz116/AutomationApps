@@ -21,7 +21,7 @@ class PaymentInstructionRequestSerializer(serializers.ModelSerializer):
         fields = [
             'transactiontimestamp', 'amount', 'paymentinstructionid',
             'receiverbankcode', 'receiveraccountnumber', 'receiverfirstname',
-            'receiversurname', 'message'
+            'receiversurname', 'message','transmissioncounter','transactionid',
         ]
 
     def create(self, validated_data):
